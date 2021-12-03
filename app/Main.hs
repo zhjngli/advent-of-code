@@ -1,6 +1,9 @@
 module Main where
 
 import Y2021.Day01.Solution
+import Y2021.Day02.Solution
 
 main :: IO ()
-main = Y2021.Day01.Solution.solve
+main = do
+    Y2021.Day01.Solution.solve
+    Y2021.Day02.Solution.solve

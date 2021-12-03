@@ -25,6 +25,7 @@ source-repository head
 library
   exposed-modules:
       Y2021.Day01.Solution
+      Y2021.Day02.Solution
   other-modules:
       Paths_advent_of_code
   hs-source-dirs:

@@ -6,8 +6,8 @@ solve :: IO ()
 solve = do
     input <- readFile "./src/Y2021/Day01/input.txt"
     let depths = read <$> lines input
-    putStrLn $ "2021.01.1: " ++ (show $ solve1 depths)
-    putStrLn $ "2021.01.2: " ++ (show $ solve2 depths)
+    putStrLn $ "2021.01.1: " ++ show (solve1 depths)
+    putStrLn $ "2021.01.2: " ++ show (solve2 depths)
 
 
 solve1 :: [Int] -> Int
