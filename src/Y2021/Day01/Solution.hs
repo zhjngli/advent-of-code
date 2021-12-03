@@ -1,6 +1,6 @@
 module Y2021.Day01.Solution where
 
-import Prelude
+import Data.List
 
 solve :: IO ()
 solve = do
@@ -10,4 +10,4 @@ solve = do
 
 
 solve1 :: [Int] -> Int
-solve1 depths = fst $ foldl (\(count, previousDepth) depth -> if depth > previousDepth then (count + 1, depth) else (count, depth)) (0, head depths) depths
+solve1 depths = fst $ foldl' (\(count, previousDepth) depth -> if depth > previousDepth then (count + 1, depth) else (count, depth)) (0, head depths) depths
