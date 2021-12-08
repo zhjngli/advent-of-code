@@ -27,12 +27,14 @@ library
       Y2021.Day01.Solution
       Y2021.Day02.Solution
       Y2021.Day03.Solution
+      Y2021.Day04.Solution
   other-modules:
       Paths_advent_of_code
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , parsec
   default-language: Haskell2010
 
 executable aoc
@@ -45,6 +47,7 @@ executable aoc
   build-depends:
       advent-of-code
     , base >=4.7 && <5
+    , parsec
   default-language: Haskell2010
 
 test-suite advent-of-code-test
@@ -58,4 +61,5 @@ test-suite advent-of-code-test
   build-depends:
       advent-of-code
     , base >=4.7 && <5
+    , parsec
   default-language: Haskell2010
