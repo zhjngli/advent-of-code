@@ -1,6 +1,5 @@
 module Y2021.Day04.Solution where
 
-import Debug.Trace
 import Data.List
 import Text.ParserCombinators.Parsec
 
