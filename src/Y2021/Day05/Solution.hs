@@ -2,7 +2,6 @@ module Y2021.Day05.Solution where
 
 import qualified Data.Map as M
 import Text.ParserCombinators.Parsec hiding (Line)
-import GHC.Conc (pseq)
 
 solve :: IO ()
 solve = do
