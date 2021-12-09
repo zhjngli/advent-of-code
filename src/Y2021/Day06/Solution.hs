@@ -9,7 +9,6 @@ solve = do
     putStrLn $ "2021.06.1: " ++ show (solve1 $ parseInput input)
     putStrLn $ "2021.06.2: " ++ show (solve2 $ parseInput input)
 
-
 parseFish :: CharParser st [Int]
 parseFish = do
     fish <- sepBy (many1 digit) (char ',')
