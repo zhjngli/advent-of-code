@@ -57,7 +57,7 @@ canVisit2 v n = M.findWithDefault 0 n v < smallVisitLimit
 
 findPaths :: (M.Map Node Int -> Node -> Bool) -> M.Map Node [Node] -> [Node] -> M.Map Node Int -> S.Set [Node]
 findPaths _ g [] v = S.empty
-findPaths _ g path@(End:ns) v = S.singleton path
+findPaths _        g path@(End:ns) v = S.singleton path
 findPaths canVisit g path@(n:ns)   v = S.unions nextPaths
     where nextNodes = filter (canVisit v) $ M.findWithDefault [] n g
           visit n = if M.member n v then M.adjust (+1) n v else M.insert n 1 v

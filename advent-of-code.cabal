@@ -36,6 +36,7 @@ library
       Y2021.Day10.Solution
       Y2021.Day11.Solution
       Y2021.Day12.Solution
+      Y2021.Day13.Solution
   other-modules:
       Paths_advent_of_code
   hs-source-dirs:
