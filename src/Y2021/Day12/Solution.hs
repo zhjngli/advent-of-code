@@ -6,6 +6,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Text.ParserCombinators.Parsec hiding (Line)
 
+solve :: IO ()
 solve = do
     input <- readFile "./src/Y2021/Day12/input.txt"
     putStrLn $ "2021.12.1: " ++ show (solve1 $ parseInput input)

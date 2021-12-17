@@ -5,6 +5,7 @@ import Data.Char
 import Data.List
 import qualified Data.Set as S
 
+solve :: IO ()
 solve = do
     input <- readFile "./src/Y2021/Day09/input.txt"
     let heightMap = map (map digitToInt) (lines input)

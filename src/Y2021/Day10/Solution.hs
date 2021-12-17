@@ -3,6 +3,7 @@ module Y2021.Day10.Solution where
 import Data.List
 import qualified Data.Set as S
 
+solve :: IO ()
 solve = do
     input <- readFile "./src/Y2021/Day10/input.txt"
     let syntaxLines = lines input

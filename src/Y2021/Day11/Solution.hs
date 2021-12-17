@@ -4,6 +4,7 @@ import Data.Array
 import Data.Char
 import qualified Data.Set as S
 
+solve :: IO ()
 solve = do
     input <- readFile "./src/Y2021/Day11/input.txt"
     let octopi = map (map digitToInt) (lines input)
