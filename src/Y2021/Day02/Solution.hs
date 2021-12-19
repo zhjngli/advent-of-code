@@ -9,7 +9,6 @@ solve = do
     putStrLn $ "2021.02.1: " ++ show (solve1 movements)
     putStrLn $ "2021.02.2: " ++ show (solve2 movements)
 
-
 solve1 :: [(String, Int)] -> Int
 solve1 movements = forward * depth
     where (forward, depth) = foldl' pos (0, 0) movements
