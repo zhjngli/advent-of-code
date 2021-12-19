@@ -46,14 +46,13 @@ step :: ((Int, Int), (Int, Int)) -> ((Int, Int), (Int, Int))
 step ((vx, vy), (x, y)) = ((max 0 (vx - 1), vy - 1), (x + vx, y + vy))
 
 solve1 :: Target -> Int
-solve1 t = maxY
-    where tries = [iterate step ((x, y), (0, 0)) | x <- [1 .. 150], y <- [1 .. 1000]]
+solve1 t@(T (sx, bx) (sy, by)) = maxY
+    where tries = [iterate step ((x, y), (0, 0)) | x <- [1 .. bx], y <- [1 .. abs sy]]
           successes = filter fst $ map (hitsTarget t []) tries
           pos = map snd successes
           maxY = maximum $ map (maximum . map snd) pos
 
 solve2 :: Target -> Int
-solve2 t = length successes
-    where tries = [iterate step ((x, y), (0, 0)) | x <- [1 .. 150], y <- [-1000 .. 1000]]
+solve2 t@(T (sx, bx) (sy, by)) = length successes
+    where tries = [iterate step ((x, y), (0, 0)) | x <- [1 .. bx], y <- [sy .. abs sy]]
           successes = filter fst $ map (hitsTarget t []) tries
-          pos = map snd successes
