@@ -17,9 +17,11 @@ import Y2021.Day14.Solution
 import Y2021.Day15.Solution
 import Y2021.Day16.Solution
 import Y2021.Day17.Solution
+import Y2021.Day21.Solution
 
 main :: IO ()
 main = do
+    Y2021.Day21.Solution.solve
     Y2021.Day17.Solution.solve
     Y2021.Day16.Solution.solve
     Y2021.Day15.Solution.solve

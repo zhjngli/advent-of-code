@@ -1,6 +1,5 @@
 module Y2021.Day17.Solution where
 
-import Debug.Trace
 import Text.ParserCombinators.Parsec hiding (Line)
 
 solve :: IO ()
