@@ -1,7 +1,5 @@
 module Y2021.Day21.Solution where
 
-import Debug.Trace
-import Data.List
 import qualified Data.Map as M
 import Text.ParserCombinators.Parsec hiding (Line)
 
