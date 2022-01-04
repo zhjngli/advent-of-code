@@ -1,4 +1,4 @@
-module Y2021.Day19.Solution where
+module Y2021.Day20.Solution where
 
 import Data.Array
 import Data.List
@@ -6,9 +6,9 @@ import Text.ParserCombinators.Parsec hiding (Line)
 
 solve :: IO ()
 solve = do
-    input <- readFile "./src/Y2021/Day19/input.txt"
-    putStrLn $ "2021.19.1: " ++ show (solve1 $ parseInput input)
-    putStrLn $ "2021.19.2: " ++ show (solve2 $ parseInput input)
+    input <- readFile "./src/Y2021/Day20/input.txt"
+    putStrLn $ "2021.20.1: " ++ show (solve1 $ parseInput input)
+    putStrLn $ "2021.20.2: " ++ show (solve2 $ parseInput input)
 
 data ImgAlgo = IAlgo { algo :: [Int],
                        first :: Int,
