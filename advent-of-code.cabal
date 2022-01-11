@@ -44,6 +44,7 @@ library
       Y2021.Day18.Solution
       Y2021.Day20.Solution
       Y2021.Day21.Solution
+      Y2021.Day22.Solution
       Y2021.Day23.Solution
       Y2021.Day25.Solution
   other-modules:
