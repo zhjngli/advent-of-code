@@ -46,6 +46,7 @@ library
       Y2021.Day21.Solution
       Y2021.Day22.Solution
       Y2021.Day23.Solution
+      Y2021.Day24.Solution
       Y2021.Day25.Solution
   other-modules:
       Paths_advent_of_code
