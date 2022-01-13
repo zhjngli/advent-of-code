@@ -18,6 +18,7 @@ import Y2021.Day15.Solution
 import Y2021.Day16.Solution
 import Y2021.Day17.Solution
 import Y2021.Day18.Solution
+import Y2021.Day19.Solution
 import Y2021.Day20.Solution
 import Y2021.Day21.Solution
 import Y2021.Day22.Solution
@@ -33,6 +34,7 @@ main = do
     Y2021.Day22.Solution.solve
     Y2021.Day21.Solution.solve
     Y2021.Day20.Solution.solve
+    Y2021.Day19.Solution.solve
     Y2021.Day18.Solution.solve
     Y2021.Day17.Solution.solve
     Y2021.Day16.Solution.solve
