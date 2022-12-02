@@ -13,7 +13,6 @@ author:         Zhijiang Li
 maintainer:     zl256@cornell.edu
 copyright:      2021 Zhijiang Li
 license:        whatever
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md

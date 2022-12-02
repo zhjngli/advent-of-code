@@ -1,4 +1,3 @@
 # advent-of-code
 
-1. `stack build`
-1. `stack exec aoc`
+for some of the years, using some language I want to learn
