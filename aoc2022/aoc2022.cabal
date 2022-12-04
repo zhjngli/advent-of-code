@@ -25,6 +25,7 @@ library
   exposed-modules:
       Day01.Solution
       Day02.Solution
+      Day03.Solution
   other-modules:
       Paths_aoc2022
   hs-source-dirs:
@@ -32,6 +33,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , containers
     , parsec
   default-language: Haskell2010
 
@@ -45,6 +47,7 @@ executable aoc
   build-depends:
       aoc2022
     , base >=4.7 && <5
+    , containers
     , parsec
   default-language: Haskell2010
 
@@ -59,5 +62,6 @@ test-suite aoc2022-test
   build-depends:
       aoc2022
     , base >=4.7 && <5
+    , containers
     , parsec
   default-language: Haskell2010
