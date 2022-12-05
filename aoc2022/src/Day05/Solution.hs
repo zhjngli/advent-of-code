@@ -69,15 +69,21 @@ parseInput i = case parse parseRearrangements "" i of
     Left e -> error (show e)
     Right es -> es
 
-solve1 :: (Array Int Stack, [Instruction]) -> String
-solve1 (ss, is) = map head $ elems $ foldl' f ss is
+solve' :: ((Stack, Stack) -> Int -> (Stack, Stack)) -> (Array Int Stack, [Instruction]) -> String
+solve' move (ss, is) = map head $ elems $ foldl' f ss is
     where f ss' (n, i1, i2) = ss' // [(i1, newS1), (i2, newS2)]
-            where (newS1, newS2) = foldr move (ss' ! i1, ss' ! i2) [1..n]
-                    where move _ (x:xs, ys) = (xs, x:ys)
-                          move _ ([], _) = error ("no more to move on: " ++ show (n, i1, i2) ++ "\n" ++ show ss')
+            where (newS1, newS2) = move (ss' ! i1, ss' ! i2) n
+
+move1 :: (Stack, Stack) -> Int -> (Stack, Stack)
+move1 (s1, s2) n = foldr move (s1, s2) [1..n]
+    where move _ (x:xs, ys) = (xs, x:ys)
+          move _ ([], _) = error ("can't move " ++ show n ++ " from: " ++ show s1 ++ " to " ++ show s2)
+
+solve1 :: (Array Int Stack, [Instruction]) -> String
+solve1 = solve' move1
+
+move2 :: (Stack, Stack) -> Int -> (Stack, Stack)
+move2 (s1, s2) n = (drop n s1, take n s1 ++ s2)
 
 solve2 :: (Array Int Stack, [Instruction]) -> String
-solve2 (ss, is) = map head $ elems $ foldl' f ss is
-    where f ss' (n, i1, i2) = ss' // [(i1, newS1), (i2, newS2)]
-            where (newS1, newS2) = move (ss' ! i1, ss' ! i2)
-                    where move (xs, ys) = (drop n xs, take n xs ++ ys)
+solve2 = solve' move2
