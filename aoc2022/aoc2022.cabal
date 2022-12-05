@@ -27,13 +27,15 @@ library
       Day02.Solution
       Day03.Solution
       Day04.Solution
+      Day05.Solution
   other-modules:
       Paths_aoc2022
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , containers
     , parsec
   default-language: Haskell2010
@@ -47,6 +49,7 @@ executable aoc
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2022
+    , array
     , base >=4.7 && <5
     , containers
     , parsec
@@ -62,6 +65,7 @@ test-suite aoc2022-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2022
+    , array
     , base >=4.7 && <5
     , containers
     , parsec

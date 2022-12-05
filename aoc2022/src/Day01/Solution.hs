@@ -1,4 +1,4 @@
-module Day01.Solution where
+module Day01.Solution (solve) where
 
 import Data.List
 import Text.ParserCombinators.Parsec
