@@ -7,9 +7,11 @@ import Day04.Solution
 import Day05.Solution
 import Day06.Solution
 import Day07.Solution
+import Day08.Solution
 
 main :: IO ()
 main = do
+    Day08.Solution.solve
     Day07.Solution.solve
     Day06.Solution.solve
     Day05.Solution.solve
