@@ -1,6 +1,6 @@
 module Day10.Solution (solve) where
 
-import Debug.Trace
+-- import Debug.Trace
 import Data.List ( foldl' )
 import Text.ParserCombinators.Parsec
 
@@ -57,8 +57,8 @@ getPix x c = if abs (c - x) <= 1 then '#' else '.'
 showCRT :: [(Int, Int)] -> String
 showCRT xs = fst3 $ foldl' showRow ("\n", 1, xs) [0..5]
     where fst3 (s, _, _) = s
-          showRow (crt, x, xs) row =
-            let (rowToShow, x', xs') = foldl' showPix ("", x, xs) [0..39] in
+          showRow (crt, regVal, regVals) row =
+            let (rowToShow, x', xs') = foldl' showPix ("", regVal, regVals) [0..39] in
             (crt ++ reverse rowToShow ++ "\n", x', xs')
             where showPix (s, x, (nextX, c):regs) col =
                     let cycleN = row * 40 + col + 1 in
