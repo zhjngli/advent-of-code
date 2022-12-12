@@ -52,7 +52,7 @@ solve1 :: [Cmd] -> Int
 solve1 = calcSignalStrength . regsOverTime
 
 getPix :: Int -> Int -> Char
-getPix x c = if abs (c - x) <= 1 then '#' else '.'
+getPix x c = if abs (c - x) <= 1 then '#' else ' '
 
 showCRT :: [(Int, Int)] -> String
 showCRT xs = fst3 $ foldl' showRow ("\n", 1, xs) [0..5]

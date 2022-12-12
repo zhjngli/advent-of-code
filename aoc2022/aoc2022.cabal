@@ -33,6 +33,7 @@ library
       Day08.Solution
       Day09.Solution
       Day10.Solution
+      Day11.Solution
   other-modules:
       Paths_aoc2022
   hs-source-dirs:
