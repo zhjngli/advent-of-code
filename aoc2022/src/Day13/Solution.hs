@@ -12,17 +12,22 @@ solve = do
     putStrLn $ "2022.13.1: " ++ show (solve1 $ parseInput input)
     putStrLn $ "2022.13.2: " ++ show (solve2 $ parseInput input)
 
-data PacketData = I Int | L [PacketData] deriving (Show, Eq)
-type Packet = [PacketData]
+data Packet = I Int | L [Packet] deriving Show
 
-parsePacketList :: CharParser st PacketData
-parsePacketList = do
-    _ <- char '['
-    l <- sepBy (parsePacketList <|> parsePacketInt) (char ',')
-    _ <- char ']'
-    return $ L l
+instance Eq Packet where
+    p1 == p2 =
+        case comparePacket p1 p2 of
+        Nothing -> True
+        _ -> False
 
-parsePacketInt :: CharParser st PacketData
+instance Ord Packet where
+    compare p1 p2 =
+        case comparePacket p1 p2 of
+        Nothing -> EQ
+        Just True -> LT
+        Just False -> GT
+
+parsePacketInt :: CharParser st Packet
 parsePacketInt = do
     i <- many1 digit
     return $ I (read i)
@@ -30,9 +35,9 @@ parsePacketInt = do
 parsePacket :: CharParser st Packet
 parsePacket = do
     _ <- char '['
-    p <- sepBy (parsePacketList <|> parsePacketInt) (char ',')
+    p <- sepBy (parsePacket <|> parsePacketInt) (char ',')
     _ <- char ']'
-    return p
+    return $ L p
 
 parsePacketPairs :: CharParser st [(Packet, Packet)]
 parsePacketPairs = do
@@ -50,25 +55,19 @@ parseInput i = case parse parsePacketPairs "" i of
     Right ps -> ps
 
 comparePacket :: Packet -> Packet -> Maybe Bool
-comparePacket (I left:p1s) (I right:p2s)
-  | left < right = Just True
-  | right < left = Just False
-  | otherwise = comparePacket p1s p2s
-comparePacket (L left:p1s) (L right:p2s) =
+comparePacket (L []) (L []) = Nothing
+comparePacket (L []) _      = Just True
+comparePacket _      (L []) = Just False
+comparePacket (I l) (I r)
+    | l < r = Just True
+    | r < l = Just False
+    | otherwise = Nothing
+comparePacket (L l) (I i) = comparePacket (L l) (L [I i])
+comparePacket (I i) (L l) = comparePacket (L [I i]) (L l)
+comparePacket (L (left:p1s)) (L (right:p2s)) =
     case comparePacket left right of
-    Nothing -> comparePacket p1s p2s
-    Just x -> Just x
-comparePacket (L left:p1s) (I right:p2s) =
-    case comparePacket left [I right] of
-    Nothing -> comparePacket p1s p2s
-    Just x -> Just x
-comparePacket (I left:p1s) (L right:p2s) =
-    case comparePacket [I left] right of
-    Nothing -> comparePacket p1s p2s
-    Just x -> Just x
-comparePacket [] [] = Nothing
-comparePacket _ [] = Just False
-comparePacket [] _ = Just True
+    Nothing -> comparePacket (L p1s) (L p2s)
+    Just b -> Just b
 
 solve1 :: [(Packet, Packet)] -> Int
 solve1 ps = foldl' f 0 $ zip [1..length ps] ps
@@ -78,16 +77,10 @@ solve1 ps = foldl' f 0 $ zip [1..length ps] ps
             Just True -> i + s
             Just False -> s
 
-instance Ord PacketData where
-    compare pd1 pd2 = case comparePacket [pd1] [pd2] of
-        Nothing -> EQ
-        Just True -> LT
-        Just False -> GT
-
 solve2 :: [(Packet, Packet)] -> Int
 solve2 ps = dp1i * dp2i
-    where dividerPacket1 = [L [I 2]]
-          dividerPacket2 = [L [I 6]]
+    where dividerPacket1 = L [L [I 2]]
+          dividerPacket2 = L [L [I 6]]
           packets = sort $ dividerPacket1:dividerPacket2:concatMap (\(p1, p2) -> [p1, p2]) ps
           dp1i = 1 + fromJust (elemIndex dividerPacket1 packets)
           dp2i = 1 + fromJust (elemIndex dividerPacket2 packets)
