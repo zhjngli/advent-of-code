@@ -3,7 +3,7 @@ module Lib.Common (
     Cost(..),
     Q,
     addCost,
-    dijkstras2D
+    dijkstrasArr
 ) where
 
 import Data.Array ( Ix(range), array, bounds, Array )
@@ -32,7 +32,7 @@ addCost _ _ = Inf
 
 data Q a ix = Q (Cost a) ix deriving (Show, Eq, Ord)
 
-dijkstras2D' :: Ix ix
+dijkstrasArr' :: Ix ix
     => Array ix a
     -- ^ starting array
     -> M.Map ix (Cost Int)
@@ -47,9 +47,9 @@ dijkstras2D' :: Ix ix
     -- ^ get neighbors of a position in the array
     -> M.Map ix (Cost Int)
     -- ^ output of the costs to reach each position in the array
-dijkstras2D' orig dist predecessor q cost neighbors
+dijkstrasArr' orig dist predecessor q cost neighbors
     | S.null q = dist
-    | otherwise = dijkstras2D' orig dist' pred' q'' cost neighbors
+    | otherwise = dijkstrasArr' orig dist' pred' q'' cost neighbors
         where (Q _ u, q') = S.deleteFindMin q
               uns = neighbors orig u
               (dist', pred', q'') = foldr funs (dist, predecessor, q') uns
@@ -59,7 +59,7 @@ dijkstras2D' orig dist predecessor q cost neighbors
                         (d'', p'', queue') | alt < distV = (M.insert v alt d', M.insert v u p', S.insert (Q alt v) queue)
                                            | otherwise = (d', p', queue)
 
-dijkstras2D :: Ix ix
+dijkstrasArr :: Ix ix
     => Array ix a
     -- ^ starting array
     -> [ix]
@@ -69,7 +69,7 @@ dijkstras2D :: Ix ix
     -> (Array ix a -> ix -> [ix])
     -- ^ get neighbors of a position in the array
     -> M.Map ix (Cost Int)
-dijkstras2D orig sources = dijkstras2D' orig dist predecessor queue
+dijkstrasArr orig sources = dijkstrasArr' orig dist predecessor queue
     where b = bounds orig
           sourcesSet = S.fromList sources
           (dist, queue) = foldr initialize (M.empty, S.empty) $ range b

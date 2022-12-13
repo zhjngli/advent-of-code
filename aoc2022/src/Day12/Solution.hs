@@ -35,7 +35,7 @@ heightMapCost :: Array (Int, Int) Char -> (Int, Int) -> Cost Int
 heightMapCost _ _ = C 1
 
 solve1 :: [[Char]] -> Cost Int
-solve1 cs = M.findWithDefault Inf end $ dijkstras2D heightMap [source] heightMapCost heightMapNeighbors
+solve1 cs = M.findWithDefault Inf end $ dijkstrasArr heightMap [source] heightMapCost heightMapNeighbors
     where heightMap = toArray cs
           (source, end) = foldr f ((0, 0), (0, 0)) $ assocs heightMap
           f (x, 'S') (_, e) = (x, e)
@@ -43,7 +43,7 @@ solve1 cs = M.findWithDefault Inf end $ dijkstras2D heightMap [source] heightMap
           f (_, _)   se     = se
 
 solve2 :: [[Char]] -> Cost Int
-solve2 cs = M.findWithDefault Inf end $ dijkstras2D heightMap sources heightMapCost heightMapNeighbors
+solve2 cs = M.findWithDefault Inf end $ dijkstrasArr heightMap sources heightMapCost heightMapNeighbors
     where heightMap = toArray cs
           (sources, end) = foldr f ([], (0, 0)) $ assocs heightMap
           f (x, 'S') (ss, e) = (x:ss, e)
