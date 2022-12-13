@@ -6,7 +6,7 @@ module Lib.Common (
     dijkstras2D
 ) where
 
-import Data.Array
+import Data.Array ( Ix(range), array, bounds, Array )
 import qualified Data.Map as M
 import qualified Data.Set as S
 
@@ -30,44 +30,45 @@ addCost :: Num a => Cost a -> Cost a -> Cost a
 addCost (C c) (C d) = C (c + d)
 addCost _ _ = Inf
 
-data Q a = Q (Cost a) (Int, Int) deriving (Show, Eq, Ord)
+data Q a ix = Q (Cost a) ix deriving (Show, Eq, Ord)
 
-dijkstras2D' :: Array (Int, Int) a
+dijkstras2D' :: Ix ix
+    => Array ix a
     -- ^ starting array
-    -> M.Map (Int, Int) (Cost Int)
+    -> M.Map ix (Cost Int)
     -- ^ distances to each position in the array
-    -> M.Map (Int, Int) (Int, Int)
+    -> M.Map ix ix
     -- ^ maps each position in the array to its predecessor in the shortest path
-    -> S.Set (Q Int)
+    -> S.Set (Q Int ix)
     -- ^ queue for exploration
-    -> (Array (Int, Int) a -> (Int, Int) -> Cost Int)
+    -> (Array ix a -> ix -> Cost Int)
     -- ^ cost function. assumes cost is a function of only the next position, not the previous
-    -> (Array (Int, Int) a -> (Int, Int) -> [(Int, Int)])
+    -> (Array ix a -> ix -> [ix])
     -- ^ get neighbors of a position in the array
-    -> M.Map (Int, Int) (Cost Int)
+    -> M.Map ix (Cost Int)
     -- ^ output of the costs to reach each position in the array
 dijkstras2D' orig dist predecessor q cost neighbors
     | S.null q = dist
     | otherwise = dijkstras2D' orig dist' pred' q'' cost neighbors
-        where (Q _ (ux, uy), q') = S.deleteFindMin q
-              uns = neighbors orig (ux, uy)
+        where (Q _ u, q') = S.deleteFindMin q
+              uns = neighbors orig u
               (dist', pred', q'') = foldr funs (dist, predecessor, q') uns
-              funs (vx, vy) (d', p', queue) = (d'', p'', queue')
-                  where alt = addCost (M.findWithDefault Inf (ux, uy) d') (cost orig (vx, vy))
-                        distV = M.findWithDefault Inf (vx, vy) d'
-                        (d'', p'', queue') | alt < distV = (M.insert (vx, vy) alt d', M.insert (vx, vy) (ux, uy) p', S.insert (Q alt (vx, vy)) queue)
+              funs v (d', p', queue) = (d'', p'', queue')
+                  where alt = addCost (M.findWithDefault Inf u d') (cost orig v)
+                        distV = M.findWithDefault Inf v d'
+                        (d'', p'', queue') | alt < distV = (M.insert v alt d', M.insert v u p', S.insert (Q alt v) queue)
                                            | otherwise = (d', p', queue)
 
--- could probably factor out (Int, Int) as a type variable
-dijkstras2D :: Array (Int, Int) a
+dijkstras2D :: Ix ix
+    => Array ix a
     -- ^ starting array
-    -> [(Int, Int)]
+    -> [ix]
     -- ^ starting position
-    -> (Array (Int, Int) a -> (Int, Int) -> Cost Int)
+    -> (Array ix a -> ix -> Cost Int)
     -- ^ cost function. assumes cost is a function of only the next position, not the previous
-    -> (Array (Int, Int) a -> (Int, Int) -> [(Int, Int)])
+    -> (Array ix a -> ix -> [ix])
     -- ^ get neighbors of a position in the array
-    -> M.Map (Int, Int) (Cost Int)
+    -> M.Map ix (Cost Int)
 dijkstras2D orig sources = dijkstras2D' orig dist predecessor queue
     where b = bounds orig
           sourcesSet = S.fromList sources
