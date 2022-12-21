@@ -37,6 +37,7 @@ library
       Day12.Solution
       Day13.Solution
       Day14.Solution
+      Day21.Solution
       Lib.Common
   other-modules:
       Paths_aoc2022

@@ -36,7 +36,6 @@ getRange (x1, y1) (x2, y2)
     | x1 >  x2 && y1 == y2 = range ((x2, y2), (x1, y1))
     | otherwise = error ("rock line is not a straight line: " ++ show (x1, y1) ++ ", " ++ show (x2, y2))
 
-
 rockLineToRange :: [(Int, Int)] -> [(Int, Int)]
 rockLineToRange [] = []
 rockLineToRange [r] = [r]
