@@ -9,7 +9,7 @@ solve :: IO ()
 solve = do
     input <- readFile "./src/Day22/input.txt"
     putStrLn $ "2022.22.1: " ++ show (solve1 $ lines input)
-    -- putStrLn $ "2022.21.2: " ++ show (solve2 $ parseInput input)
+    putStrLn $ "2022.21.2: " ++ show (solve2 $ lines input)
 
 data Instr = Move Int | R | L deriving Show
 
@@ -59,7 +59,7 @@ findStart mm = findStart' mm (1, 1)
                 Just W -> error "shouldn't be a wall here"
                 Nothing -> findStart' mm' (r, c+1)
 
-data Dir = Up | Rt | Dn | Lt
+data Dir = Up | Rt | Dn | Lt deriving (Show, Eq)
 
 turn :: Dir -> Instr -> Dir
 turn Up R = Rt
@@ -72,14 +72,14 @@ turn Lt R = Up
 turn Lt L = Dn
 turn _ m = error ("cannot turn on move " ++ show m)
 
-nextSpace :: (Int, Int) -> (Int, Int) -> Dir -> (Int, Int)
-nextSpace (r, c) (mr, _) Up = let newR = r-1 in if newR < 1  then (mr, c) else (newR, c)
-nextSpace (r, c) (_, mc) Rt = let newC = c+1 in if newC > mc then (r,  1) else (r, newC)
-nextSpace (r, c) (mr, _) Dn = let newR = r+1 in if newR > mr then (1,  c) else (newR, c)
-nextSpace (r, c) (_, mc) Lt = let newC = c-1 in if newC < 1  then (r, mc) else (r, newC)
+nextSpaceMap :: (Int, Int) -> (Int, Int) -> Dir -> (Int, Int)
+nextSpaceMap (r, c) (mr, _) Up = let newR = r-1 in if newR < 1  then (mr, c) else (newR, c)
+nextSpaceMap (r, c) (_, mc) Rt = let newC = c+1 in if newC > mc then (r,  1) else (r, newC)
+nextSpaceMap (r, c) (mr, _) Dn = let newR = r+1 in if newR > mr then (1,  c) else (newR, c)
+nextSpaceMap (r, c) (_, mc) Lt = let newC = c-1 in if newC < 1  then (r, mc) else (r, newC)
 
 nextSpaceOnMap :: (M.Map (Int, Int) MonkeyMap, (Int, Int)) -> (Int, Int) -> Dir -> (Int, Int)
-nextSpaceOnMap (m, (r, c)) s d = let (x, y) = nextSpace s (r, c) d in
+nextSpaceOnMap (m, (r, c)) s d = let (x, y) = nextSpaceMap s (r, c) d in
     if M.member (x, y) m then (x, y)
     else nextSpaceOnMap (m, (r, c)) (x, y) d
 
@@ -115,4 +115,91 @@ solve1 :: [String] -> Int
 solve1 ls = 1000*x + 4*y + dirToScore d
     where ((x, y), d) = navigate instrs (mm, b) s Rt
           (mm, b) = constructMonkeyMap ls
+          s = findStart mm
+
+-- cube looks like this, where each is a 50x50 block:
+--  12
+--  3
+-- 45
+-- 6
+-- 1: (1, 51) - (50, 100)
+-- 2: (1, 101) - (50, 150)
+-- 3: (51, 51) - (100, 100)
+-- 4: (101, 1) - (150, 50)
+-- 5: (101, 51) - (150, 100)
+-- 6: (151, 1) - (200, 50)
+bounded :: Int -> Int -> Int -> Bool
+bounded n mn mx = n <= mx && n >= mn
+
+-- can't believe i wrote this wrap thing first try, was a headache though lol
+wrapCube :: (Int, Int) -> Dir -> ((Int, Int), Dir)
+wrapCube (r, c) d
+-- 1U -> 6R
+    | d == Up && r < 1 && bounded c 51 100 = ((c+100, 1), Rt)
+-- 6L -> 1D
+    | d == Lt && bounded r 151 200 && c < 1 = ((1, r-100), Dn)
+-- 1L -> 4R
+    | d == Lt && bounded r 1 50 && c < 51 = ((151-r, 1), Rt)
+-- 4L -> 1R
+    | d == Lt && bounded r 101 150 && c < 1 = ((151-r, 51), Rt)
+-- 2U -> 6U
+    | d == Up && r < 1 && bounded c 101 150 = ((200, c-100), Up)
+-- 6D -> 2D
+    | d == Dn && r > 200 && bounded c 1 50 = ((1, c+100), Dn)
+-- 2R -> 5L
+    | d == Rt && bounded r 1 50 && c > 150 = ((151-r, 100), Lt)
+-- 5R -> 2L
+    | d == Rt && bounded r 101 150 && c > 100 = ((151-r, 150), Lt)
+-- 2D -> 3L
+    | d == Dn && r > 50 && bounded c 101 150 = ((c-50, 100), Lt)
+-- 3R -> 2U
+    | d == Rt && bounded r 51 100 && c > 100 = ((50, r+50), Up)
+-- 3L -> 4D
+    | d == Lt && bounded r 51 100 && c < 51 = ((101, r-50), Dn)
+-- 4U -> 3R
+    | d == Up && r < 101 && bounded c 1 50 = ((c+50, 51), Rt)
+-- 5D -> 6L
+    | d == Dn && r > 150 && bounded c 51 100 = ((c+100, 50), Lt)
+-- 6R -> 5U
+    | d == Rt && bounded r 151 200 && c > 50 = ((150, r-100), Up)
+    | otherwise = error ("don't know how to wrap: " ++ show (r, c) ++ ", " ++ show d)
+
+nextSpaceOnCube :: M.Map (Int, Int) MonkeyMap -> (Int, Int) -> Dir -> ((Int, Int), Dir)
+nextSpaceOnCube m s d = let (x, y) = nextSpace s d in
+    if M.member (x, y) m then ((x, y), d)
+    else wrapCube (x, y) d
+
+nextSpace :: (Int, Int) -> Dir -> (Int, Int)
+nextSpace (r, c) Up = (r-1, c)
+nextSpace (r, c) Rt = (r, c+1)
+nextSpace (r, c) Dn = (r+1, c)
+nextSpace (r, c) Lt = (r, c-1)
+
+moveCube :: M.Map (Int, Int) MonkeyMap -> (Int, Int) -> Dir -> Int -> ((Int, Int), Dir)
+moveCube _ s d 0 = (s, d)
+moveCube m s d n = let ((x, y), d') = nextSpaceOnCube m s d in
+    case M.lookup (x, y) m of
+    Just S -> moveCube m (x, y) d' (n-1)
+    Just W -> (s, d)
+    Nothing -> error "couldn't find next space"
+
+navigateCube :: [Instr]
+    -- ^ list of instructions
+    -> M.Map (Int, Int) MonkeyMap
+    -- ^ map of the cube
+    -> (Int, Int)
+    -- ^ current space
+    -> Dir
+    -- ^ current direction
+    -> ((Int, Int), Dir)
+    -- ^ ending space
+navigateCube [] _ s d = (s, d)
+navigateCube (Move n:is) mb s d = navigateCube is mb s' d'
+    where (s', d') = moveCube mb s d n
+navigateCube (t:is) mb s d = navigateCube is mb s (turn d t)
+
+solve2 :: [String] -> Int
+solve2 ls = 1000*x + 4*y + dirToScore d
+    where ((x, y), d) = navigateCube instrs mm s Rt
+          (mm, _) = constructMonkeyMap ls
           s = findStart mm
