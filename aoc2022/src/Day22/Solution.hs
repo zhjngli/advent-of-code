@@ -9,7 +9,7 @@ solve :: IO ()
 solve = do
     input <- readFile "./src/Day22/input.txt"
     putStrLn $ "2022.22.1: " ++ show (solve1 $ lines input)
-    putStrLn $ "2022.21.2: " ++ show (solve2 $ lines input)
+    putStrLn $ "2022.22.2: " ++ show (solve2 $ lines input)
 
 data Instr = Move Int | R | L deriving Show
 
