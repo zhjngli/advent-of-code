@@ -10,6 +10,8 @@ import Data.Array ( Ix(range), array, bounds, Array )
 import qualified Data.Map as M
 import qualified Data.Set as S
 
+-- >> toArray [[0,1],[2,3]]
+-- array ((0,0),(1,1)) [((0,0),0),((0,1),1),((1,0),2),((1,1),3)]
 toArray :: [[a]] -> Array (Int, Int) a
 toArray l = array bound associations
     where r = length l
