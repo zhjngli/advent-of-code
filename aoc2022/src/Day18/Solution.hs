@@ -1,14 +1,15 @@
 module Day18.Solution (solve) where
 
 -- import Debug.Trace
+import Data.Array
 import qualified Data.Set as S
 import Text.ParserCombinators.Parsec
 
 solve :: IO ()
 solve = do
     input <- readFile "./src/Day18/input.txt"
-    putStrLn $ "2022.17.8: " ++ show (solve1 $ parseInput input)
-    putStrLn $ "2022.17.8: " ++ show (solve2 $ parseInput input)
+    putStrLn $ "2022.18.1: " ++ show (solve1 $ parseInput input)
+    putStrLn $ "2022.18.2: " ++ show (solve2 $ parseInput input)
 
 type Point = (Int, Int, Int)
 
@@ -42,20 +43,27 @@ solve1 :: [Point] -> Int
 solve1 ps = sum $ map (facesShowing pset) ps
     where pset = S.fromList ps
 
-floodFill :: S.Set Point -> Point -> (S.Set Point -> Point -> [Point]) -> S.Set Point
-floodFill points p ns = floodFill' points ns [p] S.empty
+floodFill :: S.Set Point -> Point -> ((Int, Int, Int), (Int, Int, Int)) -> (S.Set Point -> Point -> [Point]) -> S.Set Point
+floodFill points p b neighborsFun = floodFill' points neighborsFun [p] S.empty
     where floodFill' _ _ [] f = f
-          floodFill' points ns (q:qs) f = floodFill' points ns qs' (S.insert q f)
-            where qs' = qs ++ ns points q
+          floodFill' ps ns (q:qs) f = floodFill' ps ns qs' (S.insert q f)
+            where qs' = qs ++ filter (\x -> inRange b x && S.notMember x f && S.notMember x (S.fromList qs)) (ns ps q)
 
-groupPoints :: S.Set Point -> [S.Set Point]
-groupPoints ps
-    | S.null ps = []
-    | otherwise = g:groupPoints ps'
-        where g = floodFill ps (S.findMax ps) (\xs x -> filter (`S.member` xs) (neighbors x))
-              ps' = ps S.\\ g
+getBounds :: S.Set Point -> ((Int, Int, Int), (Int, Int, Int))
+getBounds ps = (minb, (mx+1, my+1, mz+1))
+    where minb = (-1, -1, -1)
+          (mx, my, mz) = S.foldr f minb ps
+          f (x, y, z) (bx, by, bz) = (
+                if x > bx then x else bx,
+                if y > by then y else by,
+                if z > bz then z else bz
+            )
 
-solve2 :: [Point] -> [S.Set Point]
-solve2 ps = groupPoints exteriors
+solve2 :: [Point] -> Int
+solve2 ps = sum $ map (facesShowing totalSet) total
     where pset = S.fromList ps
-          exteriors = S.fromList $ concatMap (exteriorNeighbors pset) pset
+          b = getBounds pset
+          exterior = floodFill pset (fst b) b exteriorNeighbors
+          airPockets = foldr (\x l -> if S.member x pset || S.member x exterior then l else x:l) [] (range b)
+          total = ps ++ airPockets
+          totalSet = S.fromList total
