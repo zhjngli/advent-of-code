@@ -91,9 +91,16 @@ dropRock (c, h, ws) r = (c', y+1, ws')
           (c', ws') = dropRockStep (c, ws) initR
           (y, _) = S.findMax c'
 
+-- prints n rows top down starting from height h
+printChamber :: Chamber -> Int -> Int -> String
+printChamber chamber h rows = foldl' printRow "" [0..rows]
+    where printRow s r = s ++ "\n" ++ foldr print "" [0..6]
+            where print c rs = if S.member (h-r, c) chamber then '#':rs else '.':rs
+
 solve' :: Int -> [Wind] -> Int
-solve' i ws = h
-    where (c, h, ws') = foldl' dropRock (S.empty, 0, concat $ repeat ws) (rocks i)
+solve' i ws = -- trace (show ws' ++ "\n\n" ++ printChamber c h 3171)
+    h
+    where (c, h, ws') = foldl' dropRock (S.empty, 0, concat $ replicate 6 ws) (rocks i)
 
 solve1 :: [Wind] -> Int
 solve1 = solve' 2022
