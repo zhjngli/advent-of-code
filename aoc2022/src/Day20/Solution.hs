@@ -34,23 +34,22 @@ mix indexedCoords n
       right = tail rest
       c = c' `mod` (length indexedCoords - 1)
 
-solve1 :: [Int] -> Int
-solve1 is = mixedIs !! one + mixedIs !! two + mixedIs !! three
+mixAll :: Int -> [(Int, Int)] -> [(Int, Int)]
+mixAll 0 ics = ics
+mixAll n ics = mixAll (n-1) (foldl' mix ics [0..length ics -1])
+
+solve' :: Int -> [Int] -> Int
+solve' n is = mixedIs !! one + mixedIs !! two + mixedIs !! three
     where l = length is
           indexedIs = zip [0..l-1] is
-          mixedIs = map snd $ foldl' mix indexedIs [0..l-1]
+          mixedIs = map snd $ mixAll n indexedIs
           zeroI = fromJust $ elemIndex 0 mixedIs
           one = (zeroI + 1000) `mod` l
           two = (zeroI + 2000) `mod` l
           three = (zeroI + 3000) `mod` l
 
+solve1 :: [Int] -> Int
+solve1 = solve' 1
+
 solve2 :: [Int] -> Int
-solve2 is = mixedIs !! one + mixedIs !! two + mixedIs !! three
-    where l = length is
-          indexedIs = zip [0..l-1] (map (811589153 *) is)
-          mixedIs = map snd $ foldl' mixAll indexedIs [1..10::Int]
-            where mixAll iis _ = foldl' mix iis [0..l-1]
-          zeroI = fromJust $ elemIndex 0 mixedIs
-          one = (zeroI + 1000) `mod` l
-          two = (zeroI + 2000) `mod` l
-          three = (zeroI + 3000) `mod` l
+solve2 is = solve' 10 $ map (811589153 *) is
