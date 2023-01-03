@@ -13,8 +13,8 @@ solve = do
     putStrLn $ "2022.24.1: " ++ show (solve1 $ lines input)
     putStrLn $ "2022.24.2: " ++ show (solve2 $ lines input)
 
-data Blizzard = Up | Dn | Lt | Rt deriving (Show, Eq)
-data Mountain = W | B [Blizzard] | G deriving Show
+data Blizzard = Up | Dn | Lt | Rt deriving (Show, Eq, Ord)
+data Mountain = W | B [Blizzard] | G deriving (Show, Eq, Ord)
 
 toMountain :: Char -> Mountain
 toMountain '#' = W
@@ -57,7 +57,7 @@ mountainOverTime start time = array ((0, bs), (time, be)) asOverTime
 moves :: Array (Int, (Int, Int)) Mountain -> (Int, (Int, Int)) -> [(Int, (Int, Int))]
 moves m (t, (r, c)) = filter (\i -> inMap i && isGround i) $ zip (repeat $ t+1) [(r,c), (r+1,c), (r-1,c), (r, c+1), (r,c-1)]
     where bnds = bounds m
-          inMap i = inRange bnds i
+          inMap = inRange bnds
           isGround i = case m ! i of
             G -> True
             _ -> False
