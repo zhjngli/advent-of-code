@@ -135,9 +135,9 @@ astar :: Ord state
     -> (state -> Cost Int)
     -- ^ heuristic function
     -> (state -> state -> Cost Int)
-    -- ^ cost function. assumes cost is a function of only the next position, not the previous
+    -- ^ cost function between prev and next state
     -> (state -> [state])
-    -- ^ get neighbors of a position in the array
+    -- ^ get neighbors of a state
     -> M.Map state (Cost Int)
     -- ^ output of the costs to reach each state
 astar sources = astar' dist predecessor queue
