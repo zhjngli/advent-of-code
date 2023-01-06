@@ -5,6 +5,7 @@ import Lib.Common
 -- import Debug.Trace
 import Data.List ( tails )
 import qualified Data.Map as M
+import qualified Data.Map.Strict as MS
 import qualified Data.Set as S
 import Text.ParserCombinators.Parsec
 
@@ -42,8 +43,8 @@ parseInput i = case parse parseSystem "" i of
 type SystemState = (System, ValveId, Int, Int, S.Set Valve)
 
 -- find fastest path between all pairs of valves that have non zero flow rate and initial valve
-fastestPathBetweenValves :: System -> ValveId -> M.Map (ValveId, ValveId) Int
-fastestPathBetweenValves s initValve = foldr (\((x, y), dt) m -> M.insert (x, y) dt $ M.insert (y, x) dt m) M.empty flowValvePairs
+fastestPathBetweenValves :: System -> ValveId -> M.Map ValveId [(ValveId, Int)]
+fastestPathBetweenValves s initValve = foldr (\((x, y), dt) m -> MS.insertWith (++) x [(y, dt)] $ MS.insertWith (++) y [(x, dt)] m) M.empty flowValvePairs
     where flowValves = initValve:(map fst . M.toList $ M.filter (\(r, _) -> r /= 0) s)
           flowValvePairs = [
                 ((x, y), t)
@@ -57,11 +58,10 @@ fastestPathBetweenValves s initValve = foldr (\((x, y), dt) m -> M.insert (x, y)
           ns v = snd $ s M.! v
 
 -- find fastest path to closed valves that have nonzero flow rate from a state
-fastestPathToClosedValves :: M.Map (ValveId, ValveId) Int -> SystemState -> [SystemState]
+fastestPathToClosedValves :: M.Map ValveId [(ValveId, Int)] -> SystemState -> [SystemState]
 fastestPathToClosedValves dts (sys, vid, t, limit, openValves) = [
         (sys, y, finalT, limit, openValves)
-        | ((x, y), dt) <- M.toList dts
-        , vid == x
+        | (y, dt) <- dts M.! vid
         , let valve@(r, _) = sys M.! y
         , r /= 0
         , S.notMember valve openValves
@@ -69,7 +69,7 @@ fastestPathToClosedValves dts (sys, vid, t, limit, openValves) = [
         , finalT < limit
     ]
 
-neighbors :: M.Map (ValveId, ValveId) Int -> SystemState -> [SystemState]
+neighbors :: M.Map ValveId [(ValveId, Int)] -> SystemState -> [SystemState]
 neighbors dts ss@(s, vid, t, limit, vs)
     | t >= limit = []
     | M.filter (\v@(r, _) -> S.notMember v vs && r /= 0) s == M.empty = [] -- no closed valves, don't need to do anything
