@@ -1,7 +1,7 @@
 module Lib.Common (
     toArray,
     Cost(..),
-    Q,
+    Q(..),
     addCost,
     astar,
     dijkstrasArr,
