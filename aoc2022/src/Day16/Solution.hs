@@ -3,7 +3,7 @@ module Day16.Solution (solve) where
 import Lib.Common
 
 -- import Debug.Trace
-import Data.List ( minimumBy, tails )
+import Data.List ( maximumBy, minimumBy, tails )
 import qualified Data.Map as M
 import qualified Data.Map.Strict as MS
 import qualified Data.Set as S
@@ -13,10 +13,9 @@ solve :: IO ()
 solve = do
     input <- readFile "./src/Day16/input.txt"
     test <- readFile "./src/Day16/test.txt"
-    putStrLn $ "2022.16.2 test: " ++ show (solve2 $ parseInput test)
-    -- putStrLn $ "2022.16.2: " ++ show (solve2 $ parseInput input)
-    putStrLn $ "2022.16.1 test: " ++ show (solve1 $ parseInput test)
     putStrLn $ "2022.16.1: " ++ show (solve1 $ parseInput input)
+    putStrLn $ "2022.16.2 TE: " ++ show (solve2TE $ parseInput input)
+    putStrLn $ "2022.16.2 test: " ++ show (solve2 $ parseInput test)
 
 type ValveId = String
 type Valve = (Int, [ValveId])
@@ -84,7 +83,7 @@ neighbors dts ss@(s, _, t, limit, vs)
                 , let valve@(rate, _) = s M.! vid'
                 , rate /= 0
                 , S.notMember valve vs'
-                , t'+1 < limit
+                , t'+1 <= limit
             ]
 
 cost :: SystemState -> SystemState -> Cost Int
@@ -109,6 +108,60 @@ solve1 s = -- trace (show $ M.size allStates)
           missedFlow (_, Inf) = error "infinite cost"
           minMissedFlow = minimum . map missedFlow $ M.toList endStates
 
+-- trial and error ish way to trim the search space of part 2 lol
+-- basic assumption is that elephant and human are indistinguishable, we just need to search once and pair up all the possible states
+-- after pairing, the states should have visited disjoint valves (they are visited by different actors)
+solve2TE :: System -> (Int, Int, Int)
+solve2TE s = maximumBy (\(_, _, a) (_, _, b) -> compare a b) limits
+    where fullLimit = 26
+          limits = foldr foldLimits [] [fullLimit]
+          foldLimits limit a = foldr (foldDiffs limit) a [2]
+          foldDiffs l d a = case solve2TE' l d s of
+                            Just f -> (l, d, f) : a
+                            Nothing -> a
+
+-- limit and valveDiff are parameters to tune for optimizing the search (e.g. for test input, it works at limit=11, diff<=2)
+-- limit defines the length of time to give the actors. in the test input, limit=11 since by then both actors will have covered all the valves
+-- when limit is too high, the resulting states aren't optimal because the actors may have been able to cover more valves in less time
+-- valveDiff defines the search space of pairs. it may be the case that two actors cannot open all valves in the given time
+-- it also may be the case that actors SHOULDN'T open all possible valves in the given time, since they can lean on the other actor.
+-- so in this case filter by nonNullFlowStates rather than endStates
+-- if valveDiff is too high, the search space is too large, so keep it close to 0
+solve2TE' :: Int -> Int -> System -> Maybe Int
+solve2TE' limit valveDiff s = case minMissedFlowPair of
+        Just (a, b) -> Just $ 2 * fullPotentialFlowOverTimeLimit - (missedFlow a + missedFlow b) + remainingFlow a + remainingFlow b
+        Nothing -> Nothing
+    where fullLimit = 26
+          initValve = "AA"
+          start = (s, initValve, 0, limit, S.empty)
+
+          precalculatedPaths = fastestPathBetweenValves s initValve
+          ns = neighbors precalculatedPaths
+
+          openValvesFlow vs = sum . map fst $ S.toList vs
+          flowValves = S.fromList . map snd . M.toList $ M.filter (\(r, _) -> r /= 0) s
+          fullFlow = openValvesFlow flowValves
+          fullPotentialFlowOverTimeLimit = limit * fullFlow
+
+          allStates = dijkstras [start] cost ns
+          nonNullFlowStates = M.filterWithKey (\(_, _, _, _, vs) _ -> not $ S.null vs) allStates
+
+          missedFlow ((_, _, t, lim, vs), C c) = c + (lim - t) * sum (M.map fst $ M.filter (`S.notMember` vs) s)
+          missedFlow (_, Inf) = error "infinite cost"
+          remainingFlow ((_, _, _, lim, vs), _) = (fullLimit - lim) * openValvesFlow vs
+
+          maxOpenedValvesByState = maximum . map (\((_, _, _, _, vs), _) -> S.size vs) $ M.toList nonNullFlowStates
+          statesThatOpenedTheMostValves = M.filterWithKey (\(_, _, _, _, vs) _ -> S.size vs >= maxOpenedValvesByState-valveDiff) nonNullFlowStates
+          statePairs = [
+                (x, y)
+                | (x@((_, _, _, _, xvs), _):ys) <- tails $ M.toList statesThatOpenedTheMostValves
+                , y@((_, _, _, _, yvs), _) <- ys
+                , S.disjoint xvs yvs
+            ]
+          minMissedFlowPair = case statePairs of
+                [] -> Nothing
+                ps -> Just $ minimumBy (\(ax, ay) (bx, by) -> compare (missedFlow ax + missedFlow ay) (missedFlow bx + missedFlow by)) ps
+
 -- current state: system, where you are, where elephant is, your time, elephant time, time limit, your open valves, elephant open valves
 type SystemState2 = (System, ValveId, ValveId, Int, Int, Int, S.Set Valve, S.Set Valve)
 
@@ -130,8 +183,8 @@ neighbors2 dts (s, yid, eid, yt, et, limit, yvs, evs)
                 , er /= 0
                 , S.notMember y vs
                 , S.notMember e vs
-                , yt'+1 < limit
-                , et'+1 < limit
+                , yt'+1 <= limit
+                , et'+1 <= limit
             ]
 
 -- counts cost of both actors
@@ -141,18 +194,20 @@ cost2 (s1, yid1, eid1, yt1, et1, limit1, yvs1, evs1) (s2, yid2, eid2, yt2, et2, 
           ecost = cost (s1, eid1, et1, limit1, evs1) (s2, eid2, et2, limit2, evs2)
 
 solve2 :: System -> Int
-solve2 s = -- trace (show minMissedFlow)
-    2 * fullPotentialFlowOverTimeLimit - fst minMissedFlow + (fullLimit - limit) * fullFlow
+solve2 s = 2 * fullPotentialFlowOverTimeLimit - missedFlow es + remainingFlow es
     where fullLimit = 26
           limit = 26
           initValve = "AA"
           start = (s, initValve, initValve, 0, 0, limit, S.empty, S.empty)
+
           precalculatedPaths = fastestPathBetweenValves s initValve
-          ns = -- trace (M.foldrWithKey (\k a s -> s ++ "\n" ++ show k ++ ": " ++ show (sortBy (\a b -> compare (snd a) (snd b)) a)) "" precalculatedPaths)
-            neighbors2 precalculatedPaths
+          ns = neighbors2 precalculatedPaths
+
+          openValvesFlow vs = sum . map fst $ S.toList vs
           flowValves = S.fromList . map snd . M.toList $ M.filter (\(r, _) -> r /= 0) s
-          fullFlow = sum . map fst $ S.toList flowValves
+          fullFlow = openValvesFlow flowValves
           fullPotentialFlowOverTimeLimit = limit * fullFlow
+
           allStates = dijkstras [start] cost2 ns
           nonNullFlowStates = M.filterWithKey (\(_, _, _, _, _, _, yvs, evs) _ -> not (S.null yvs || S.null evs)) allStates
           endStates = M.filterWithKey (\state _ -> null $ ns state) nonNullFlowStates
@@ -160,4 +215,6 @@ solve2 s = -- trace (show minMissedFlow)
             + (lim - yt) * sum (M.map fst $ M.filter (`S.notMember` yvs) s)
             + (lim - et) * sum (M.map fst $ M.filter (`S.notMember` evs) s)
           missedFlow (_, Inf) = error "infinite cost"
-          minMissedFlow = minimumBy (\a b -> compare (fst a) (fst b)) . map (\st@((_, _, _, _, _, _, yvs, evs), _) -> (missedFlow st, S.union yvs evs == flowValves)) $ M.toList endStates
+          remainingFlow ((_, _, _, _, _, lim, yvs, evs), _) = (fullLimit - lim) * openValvesFlow (S.union yvs evs)
+
+          es = minimumBy (\a b -> compare (missedFlow a) (missedFlow b)) $ M.toList endStates
