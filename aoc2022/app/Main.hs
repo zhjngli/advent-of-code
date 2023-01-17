@@ -28,17 +28,17 @@ import Day25.Solution
 
 main :: IO ()
 main = do
-    Day19.Solution.solve
-    Day16.Solution.solve
-    Day17.Solution.solve
-    Day20.Solution.solve
-    Day18.Solution.solve
     Day25.Solution.solve
     Day24.Solution.solve
-    Day15.Solution.solve
     Day23.Solution.solve
     Day22.Solution.solve
     Day21.Solution.solve
+    Day20.Solution.solve
+    Day19.Solution.solve
+    Day18.Solution.solve
+    Day17.Solution.solve
+    Day16.Solution.solve
+    Day15.Solution.solve
     Day14.Solution.solve
     Day13.Solution.solve
     Day12.Solution.solve
