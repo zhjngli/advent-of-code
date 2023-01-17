@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Day19.Solution (solve) where
 
 -- import Debug.Trace
@@ -69,7 +68,6 @@ type Bots = M.Map Resource Int
 type Resources = M.Map Resource Int
 
 maxGeodes :: Blueprint -> Int -> Bots -> Resources -> St.State Int Int
-maxGeodes _ 0 _ resources = return $ resources M.! Geo
 maxGeodes bp remainingTime bots resources = do
     best <- St.get
     let noopMax = resources M.! Geo + bots M.! Geo * remainingTime
