@@ -1,0 +1,71 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           aoc2023
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/zhjngli/advent-of-code#readme>
+homepage:       https://github.com/zhjngli/advent-of-code#readme
+bug-reports:    https://github.com/zhjngli/advent-of-code/issues
+author:         Zhijiang
+maintainer:     zl256@cornell.edu
+copyright:      2023 Zhijiang Li
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/zhjngli/advent-of-code
+
+library
+  exposed-modules:
+      Day01.Solution
+  other-modules:
+      Paths_aoc2023
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+  default-language: Haskell2010
+
+executable aoc
+  main-is: Main.hs
+  other-modules:
+      Paths_aoc2023
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aoc2023
+    , array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+  default-language: Haskell2010
+
+test-suite aoc2023-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_aoc2023
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aoc2023
+    , array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+  default-language: Haskell2010
