@@ -24,6 +24,7 @@ source-repository head
 library
   exposed-modules:
       Day01.Solution
+      Day02.Solution
   other-modules:
       Paths_aoc2023
   hs-source-dirs:
