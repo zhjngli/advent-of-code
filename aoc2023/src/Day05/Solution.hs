@@ -2,6 +2,7 @@ module Day05.Solution (solve) where
 
 import Data.List (foldl')
 import Text.ParserCombinators.Parsec
+import GHC.Conc
 
 solve :: IO ()
 solve = do
@@ -84,7 +85,10 @@ solve1 :: (Seeds, SeedSoilMap, SoilFertilizerMap, FertilizerWaterMap, WaterLight
 solve1 (ss, ssm, sfm, fwm, wlm, ltm, thm, hlm) = minimum $ map (hlm . thm . ltm . wlm . fwm . sfm . ssm) ss
 
 solve2 :: (Seeds, SeedSoilMap, SoilFertilizerMap, FertilizerWaterMap, WaterLightMap, LightTempMap, TempHumidityMap, HumidityLocationMap) -> Int
-solve2 (ss, ssm, sfm, fwm, wlm, ltm, thm, hlm) = solve1 (newSeeds ss, ssm, sfm, fwm, wlm, ltm, thm, hlm)
-    where newSeeds (seedStart:seedRange:ss') = [seedStart..seedStart+seedRange-1] ++ newSeeds ss'
+solve2 (ss, ssm, sfm, fwm, wlm, ltm, thm, hlm) = minimum $ newSeeds ss
+    where newSeeds (seedStart:seedRange:ss') = x `par` y `pseq` x:y
+                where
+                    x = solve1 ([seedStart..seedStart+seedRange-1], ssm, sfm, fwm, wlm, ltm, thm, hlm)
+                    y = newSeeds ss'
           newSeeds [] = []
           newSeeds _ = error "odd number of seeds"
