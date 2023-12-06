@@ -25,6 +25,7 @@ dependencies:
 - array
 - mtl
 - text
+- split
 
 ghc-options:
 - -Wall
