@@ -2,13 +2,11 @@ module Day07.Solution (solve) where
 
 import Data.List.Split
 import Data.List ( foldl', sort, sortBy )
-import Data.Map as M (elems, empty, delete, insertWith, findWithDefault)
+import Data.Map as M (elems, empty, delete, insertWith, findWithDefault, Map)
 
 solve :: IO ()
 solve = do
     input <- readFile "./src/Day07/input.txt"
-    test <- readFile "./src/Day07/test.txt"
-    putStrLn $ "2023.07.1 test: " ++ show (solve1 $ parseInput test)
     putStrLn $ "2023.07.1: " ++ show (solve1 $ parseInput input)
     putStrLn $ "2023.07.2: " ++ show (solve2 $ parseInput input)
 
@@ -37,6 +35,11 @@ parseInput i = foldl'
     )
     [] (lines i)
 
+countItems :: Ord a => [a] -> M.Map a Int
+countItems = foldl'
+    (\count c -> M.insertWith (+) c (1::Int) count)
+    M.empty
+
 getHand' :: ([Card] -> [Int]) -> [Card] -> Hand
 getHand' toCounts cs = case toCounts cs of
     [5] -> FiveKind
@@ -50,11 +53,7 @@ getHand' toCounts cs = case toCounts cs of
 
 handToCounts1 :: [Card] -> [Int]
 handToCounts1 cs = sort $ M.elems counter
-    where
-        counter = foldl'
-            (\count c -> M.insertWith (+) c (1::Int) count)
-            M.empty
-            cs
+    where counter = countItems cs
 
 getHand1 :: [Card] -> Hand
 getHand1 = getHand' handToCounts1
@@ -68,10 +67,7 @@ handToCounts2 cs = initCounts ++ [lastCounts + jokers]
         counts = sort $ M.elems counterNoJokers
         jokers = M.findWithDefault 0 J counter
         counterNoJokers = M.delete J counter
-        counter = foldl'
-            (\count c -> M.insertWith (+) c (1::Int) count)
-            M.empty
-            cs
+        counter = countItems cs
 
 getHand2 :: [Card] -> Hand
 getHand2 = getHand' handToCounts2
