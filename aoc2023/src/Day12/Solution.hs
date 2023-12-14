@@ -7,7 +7,7 @@ solve :: IO ()
 solve = do
     input <- readFile "./src/Day12/input.txt"
     putStrLn $ "2023.12.1: " ++ show (solve' 1 $ parseInput input)
-    putStrLn $ "2023.12.1: " ++ show (solve' 5 $ parseInput input)
+    putStrLn $ "2023.12.2: " ++ show (solve' 5 $ parseInput input)
 
 data Condition = O | D | U deriving (Show, Eq)
 type Spring = [Condition]
