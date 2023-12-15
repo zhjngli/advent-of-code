@@ -1,8 +1,8 @@
 module Day14.Solution (solve) where
 
-import Data.Array
-import Lib.Common
-import Data.List ( foldl' )
+import Data.List ( sort, intercalate, transpose )
+import Data.List.Split
+import qualified Data.Map as M
 
 solve :: IO ()
 solve = do
@@ -10,57 +10,40 @@ solve = do
     putStrLn $ "2023.14.1: " ++ show (solve1 $ parseInput input)
     putStrLn $ "2023.14.2: " ++ show (solve2 $ parseInput input)
 
-parseInput :: String -> Array (Int, Int) Char
-parseInput = toArray . lines
+parseInput :: String -> [String]
+parseInput = lines
 
-north :: (Int, Int) -> (Int, Int)
-north (r, c) = (r-1, c)
+east :: [String] -> [String]
+east = map (intercalate "#" . map sort . splitOn "#")
 
-west :: (Int, Int) -> (Int, Int)
-west (r, c) = (r, c-1)
+west :: [String] -> [String]
+west = map reverse . east . map reverse
 
-south :: (Int, Int) -> (Int, Int)
-south (r, c) = (r+1, c)
+north :: [String] -> [String]
+north = transpose . west . transpose
 
-east :: (Int, Int) -> (Int, Int)
-east (r, c) = (r, c+1)
+south :: [String] -> [String]
+south = transpose . east . transpose
 
-move :: ((Int, Int) -> (Int, Int)) -> Array (Int, Int) Char -> (Int, Int) -> (Int, Int)
-move fi a i
-    | inRange b i' && a ! i' == '.' = move fi a i'
-    | otherwise = i
+spin :: [String] -> [String]
+spin = east . south . west . north
+
+totalLoad :: [String] -> Int
+totalLoad = sum . zipWith (\ i r -> i * length (filter (== 'O') r)) [1..] . reverse
+
+solve1 :: [String] -> Int
+solve1 = totalLoad . north
+
+detectCycle :: [String] -> Int -> M.Map [String] Int -> (Int, Int)
+detectCycle a i known =
+    case M.lookup a known of
+    Just s -> (s, i - s)
+    Nothing -> detectCycle (spin a) (i + 1) (M.insert a i known)
+
+solve2 :: [String] -> Int
+solve2 a = totalLoad a'
     where
-        i' = fi i
-        b = bounds a
-
-moveAll :: (Array (Int, Int) Char -> (Int, Int) -> (Int, Int)) -> Array (Int, Int) Char -> Array (Int, Int) Char
-moveAll f a = foldl'
-    (\a' i ->
-        if a' ! i == 'O' then let i' = f a' i in a' // [(i, '.'), (i', 'O')]
-        else a'
-    )
-    a (indices a)
-
-spin :: Array (Int, Int) Char -> Array (Int, Int) Char
-spin a = a''''
-    where
-        a' = moveAll (move north) a
-        a'' = moveAll (move west) a'
-        a''' = moveAll (move south) a''
-        a'''' = moveAll (move east) a'''
-
-totalLoad :: Array (Int, Int) Char -> Int
-totalLoad a = foldr
-    (\((r', _), e) load ->
-        case e of
-        'O' -> load + (r + 1 - r')
-        _ -> load
-    )
-    0 (assocs a)
-    where (_, (r, _)) = bounds a
-
-solve1 :: Array (Int, Int) Char -> Int
-solve1 = totalLoad . moveAll (move north)
-
-solve2 :: Array (Int, Int) Char -> Int
-solve2 a = totalLoad $ foldr (\_ a' -> spin a') a [1::Int ..1000000000]
+        (cycleStart, cycleLength) = detectCycle a 0 M.empty
+        totalSpins = 1000000000
+        extraSpins = cycleStart + (totalSpins - cycleStart) `mod` cycleLength
+        a' = iterate spin a !! extraSpins
