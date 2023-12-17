@@ -1,14 +1,17 @@
 module Lib.Common (
     toArray,
+    showArray,
     Cost(..),
     Q(..),
     addCost,
     astar,
     dijkstrasArr,
-    dijkstras
+    dijkstras,
+    trackPath
 ) where
 
-import Data.Array ( Ix(range), array, bounds, Array )
+import Data.Array ( Ix(range), array, bounds, Array, assocs )
+import Data.Foldable ( Foldable(foldl') )
 import qualified Data.Map as M
 import qualified Data.Set as S
 
@@ -23,6 +26,10 @@ toArray l = array bound associations
           rcIndices = zip [0..r-1] cIndices
           associations = concatMap associate rcIndices
           associate (r', cs) = map (\(c', i) -> ((r', c'), i)) cs
+
+showArray :: Array (Int, Int) a -> (((Int, Int), a) -> String) -> String
+showArray a showa = foldl' (\s e@((_, c), _) -> let acc = s ++ showa e in if c == maxc then acc ++ "\n" else acc) "" (assocs a)
+    where (_, (_, maxc)) = bounds a
 
 data Cost a = C a | Inf deriving (Show, Eq)
 instance (Ord a) => Ord (Cost a) where
@@ -82,6 +89,15 @@ dijkstrasArr orig sources = dijkstrasArr' orig dist predecessor queue
             (M.insert xy cost d, S.insert (Q cost xy) q)
           predecessor = M.empty
 
+-- get a set of state from the end to the start based on a map of predecessors from dijkstras
+trackPath :: Ord state => M.Map state state -> state -> state -> S.Set state
+trackPath m start end = s
+    where
+        s = trackPath' end S.empty
+        trackPath' curr s'
+            | curr == start = s'
+            | otherwise = trackPath' (m M.! curr) (S.insert curr s')
+
 -- -- A specific case of dijkstras when it's possible to run it on an array.
 -- -- This works, but runs slowly because it needs to copy all the arrays to each state.
 -- -- Treat state as (Array ix a, ix)
@@ -115,10 +131,10 @@ astar' :: Ord state
     -- ^ cost function between prev and next state
     -> (state -> [state])
     -- ^ get neighbors of a state
-    -> M.Map state (Cost Int)
-    -- ^ output of the costs to reach each state
+    -> (M.Map state (Cost Int), M.Map state state)
+    -- ^ output of the (costs, predecessors) to reach each state
 astar' dist predecessor q heuristic cost neighbors
-    | S.null q = dist
+    | S.null q = (dist, predecessor)
     | otherwise = astar' dist' pred' q'' heuristic cost neighbors
         where (Q _ u, q') = S.deleteFindMin q
               uns = neighbors u
@@ -138,8 +154,8 @@ astar :: Ord state
     -- ^ cost function between prev and next state
     -> (state -> [state])
     -- ^ get neighbors of a state
-    -> M.Map state (Cost Int)
-    -- ^ output of the costs to reach each state
+    -> (M.Map state (Cost Int), M.Map state state)
+    -- ^ output of the (costs, predecessors) to reach each state
 astar sources = astar' dist predecessor queue
     where sourcesSet = S.fromList sources
           (dist, queue) = S.foldr initialize (M.empty, S.empty) sourcesSet
@@ -152,9 +168,9 @@ dijkstras :: Ord state
     => [state]
     -- ^ starting states
     -> (state -> state -> Cost Int)
-    -- ^ cost function. assumes cost is a function of only the next position, not the previous
+    -- ^ cost function between prev and next state
     -> (state -> [state])
-    -- ^ get neighbors of a position in the array
-    -> M.Map state (Cost Int)
-    -- ^ output of the costs to reach each state
+    -- ^ get neighbors of a state
+    -> (M.Map state (Cost Int), M.Map state state)
+    -- ^ output of the (costs, predecessors) to reach each state
 dijkstras sources = astar sources (const $ C 0)
