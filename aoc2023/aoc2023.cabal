@@ -47,7 +47,8 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      array
+      MemoTrie
+    , array
     , base >=4.7 && <5
     , containers
     , mtl
@@ -64,7 +65,8 @@ executable aoc
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aoc2023
+      MemoTrie
+    , aoc2023
     , array
     , base >=4.7 && <5
     , containers
@@ -83,7 +85,8 @@ test-suite aoc2023-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aoc2023
+      MemoTrie
+    , aoc2023
     , array
     , base >=4.7 && <5
     , containers
