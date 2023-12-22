@@ -1,6 +1,7 @@
 module Lib.Common (
     toArray,
     showArray,
+    showArrayT,
     Cost(..),
     Q(..),
     addCost,
@@ -13,6 +14,7 @@ module Lib.Common (
 import Data.Array ( Ix(range), array, bounds, Array, assocs )
 import Data.Foldable ( Foldable(foldl') )
 import qualified Data.Map as M
+import qualified Data.Text as T
 import qualified Data.Set as S
 
 -- >> toArray [[0,1],[2,3]]
@@ -26,6 +28,10 @@ toArray l = array bound associations
           rcIndices = zip [0..r-1] cIndices
           associations = concatMap associate rcIndices
           associate (r', cs) = map (\(c', i) -> ((r', c'), i)) cs
+
+showArrayT :: Array (Int, Int) a -> (((Int, Int), a) -> Char) -> String
+showArrayT a showa = T.unpack $ foldl' (\s e@((_, c), _) -> let acc = T.snoc s (showa e) in if c == maxc then T.snoc acc '\n' else acc) T.empty (assocs a)
+    where (_, (_, maxc)) = bounds a
 
 showArray :: Array (Int, Int) a -> (((Int, Int), a) -> String) -> String
 showArray a showa = foldl' (\s e@((_, c), _) -> let acc = s ++ showa e in if c == maxc then acc ++ "\n" else acc) "" (assocs a)
