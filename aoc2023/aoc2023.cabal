@@ -44,6 +44,7 @@ library
       Day19.Solution
       Day20.Solution
       Day21.Solution
+      Day22.Solution
       Lib.Common
   other-modules:
       Paths_aoc2023
