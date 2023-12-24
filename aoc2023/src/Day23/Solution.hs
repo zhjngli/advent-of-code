@@ -43,6 +43,11 @@ canMoveTo a (ix@(r, c), visited) = case a ! ix of
 cost :: PathState -> PathState -> Cost Int
 cost _ _ = C (-1)
 
+-- i could probably update solve1 to use the same method as solve2, but
+-- 1. i think it's pretty cool to hack dijkstras in this way
+-- 2. it's fast enough
+-- 3. i'm lazy
+-- unfortunately this dijkstras hack is too slow for part2 lol
 solve1 :: Array (Int, Int) Char -> Cost Int
 solve1 a = minimum $ M.filterWithKey (\(i, _) _ -> i == end) costs
     where
