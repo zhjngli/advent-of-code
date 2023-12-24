@@ -22,9 +22,11 @@ import Day19.Solution
 import Day20.Solution
 import Day21.Solution
 import Day22.Solution
+import Day23.Solution
 
 main :: IO ()
 main = do
+    Day23.Solution.solve
     Day22.Solution.solve
     Day21.Solution.solve
     Day20.Solution.solve
