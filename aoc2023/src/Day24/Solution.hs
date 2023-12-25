@@ -52,10 +52,10 @@ solve1 l = length $ filter (uncurry intersection) (pairs lmb)
     where lmb = map calcMB l
 
 maxVelocity :: [(Point, Vel)] -> Double
-maxVelocity = maxV' 0
+maxVelocity = maxV 0
     where
-        maxV' n [] = n
-        maxV' n ((_, (vx, vy, vz)):ls) = maxV' (maximum [n, abs vx, abs vy, abs vz]) ls
+        maxV n [] = n
+        maxV n ((_, (vx, vy, vz)):ls) = maxV (maximum [n, abs vx, abs vy, abs vz]) ls
 
 hitsStone :: (Point, Vel) -> (Point, Vel) -> Bool
 hitsStone r@((x, y, z), (vx, vy, vz)) s@((sx, sy, sz), (svx, svy, svz)) =
@@ -69,34 +69,42 @@ hitsStone r@((x, y, z), (vx, vy, vz)) s@((sx, sy, sz), (svx, svy, svz)) =
         z + vz * t == sz + svz * t
 
 hitsAllStones :: (Point, Vel) -> (Point, Vel) -> Vel -> [(Point, Vel)] -> Maybe (Point, Vel)
-hitsAllStones ((x1, y1, z1), (vx1, vy1, vz1)) ((x2, y2, z2), (vx2, vy2, vz2)) (vx, vy, vz) ss
+hitsAllStones ((x1, y1, z1), (vx1, vy1, vz1)) ((x2, y2, _), (vx2, vy2, _)) (vx, vy, vz) ss
     | vx == 0 || vy == 0 || vz == 0 = Nothing
     | dvs == 0 = Nothing
     | otherwise =
         let r = ((x, y, z), (vx, vy, vz)) in
         if all (hitsStone r) ss then Just r else Nothing
     where
-        dx1 = vx1 - vx
-        dy1 = vy1 - vy
-        dx2 = vx2 - vx
-        dy2 = vy2 - vy
-        dvs = (dx1 * dy2) - (dx2 * dy1)
-        t = (dy2 * (x2 - x1) - dx2 * (y2 - y1)) / dvs
-        x = x1 + dx1 * t
-        y = y1 + dy1 * t
+        -- assume rock ((x, y, z), (vx, vy, vz)), hits s1 and s2 at t1 and t2
+        -- (vx, vy, vz) are given to us. we need to find rock initial position (x, y, z)
+        -- then:
+        -- x + vx * t1 = x1 + vx1 * t1
+        -- y + vy * t1 = y1 + vy1 * t1
+        -- x + vx * t2 = x2 + vx2 * t2
+        -- y + vy * t2 = y2 + vy2 * t2
+        -- use the 4 equations to isolate and solve for t1
+        -- then using t1 we can calculate (x, y, z) of the rock
+        dvx1 = vx1 - vx
+        dvy1 = vy1 - vy
+        dvx2 = vx2 - vx
+        dvy2 = vy2 - vy
+        dvs = (dvx1 * dvy2) - (dvx2 * dvy1)
+        t = (dvy2 * (x2 - x1) - dvx2 * (y2 - y1)) / dvs
+        x = x1 + dvx1 * t
+        y = y1 + dvy1 * t
         z = z1 + (vz1 - vz) * t
 
-findRock :: (Point, Vel) -> (Point, Vel) -> [(Point, Vel)] -> [Vel] -> (Point, Vel)
-findRock _ _ _ [] = error "couldn't find a suitable rock!"
-findRock s1 s2 ss (v:vs) = case hitsAllStones s1 s2 v ss of
-    Nothing -> findRock s1 s2 ss vs
+findRock :: [(Point, Vel)] -> [Vel] -> (Point, Vel)
+findRock _ [] = error "couldn't find a suitable rock!"
+findRock ss@(s1:s2:_) (v:vs) = case hitsAllStones s1 s2 v ss of
+    Nothing -> findRock ss vs
     Just r -> r
+findRock _ _ = error "not enough stones to isolate a single rock to hit all the stones"
 
 solve2BF :: [(Point, Vel)] -> (Point, Vel)
-solve2BF ss = findRock s1 s2 ss vs
+solve2BF ss = findRock ss vs
     where
-        s1 = head ss
-        s2 = ss !! 1
         mv = maxVelocity ss
         vrange = [-mv..mv]
         vs = [(vx, vy, vz) |
