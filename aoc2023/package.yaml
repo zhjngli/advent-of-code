@@ -27,6 +27,7 @@ dependencies:
 - text
 - split
 - MemoTrie
+- random
 
 ghc-options:
 - -Wall
