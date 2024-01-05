@@ -37,7 +37,7 @@ step n a s = step (n-1) a (S.foldr' S.union S.empty (S.map (nexts a) s))
 
 solve1 :: Array (Int, Int) Char -> Int
 solve1 a = S.size s
-    where s = step 65 a (start a)
+    where s = step 64 a (start a)
 
 {- divide the region input into 2 regions, the diamond, and the corners
 each region has an odd and even case, corresponding to whether n number of steps will let you go back to the center tile
