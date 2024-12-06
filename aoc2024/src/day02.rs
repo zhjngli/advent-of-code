@@ -43,7 +43,7 @@ fn solve2(s: &str) -> usize {
 pub fn solve() {
     let result = fs::read_to_string("data/02.txt");
     let binding = result.unwrap_or_else(|error| {
-        eprintln!("Error: {}", error);
+        eprintln!("ERROR: {}", error);
         "1 1\n".to_string()
     });
     let input = binding.as_str();
