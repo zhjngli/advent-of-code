@@ -63,6 +63,10 @@ fn _solve(claw_machines: &Vec<ClawMachine>, max_presses: i64) -> i64 {
                     if c.ax as f64 / c.ay as f64 == c.bx as f64 / c.by as f64
                         && c.ax as f64 / c.ay as f64 == c.px as f64 / c.py as f64
                     {
+                        // code here is actually wrong cause i need to cast a to float
+                        // then check that a is an integer in the corresponding solution
+                        // but apparently no cases given where there's more than 1 solution
+
                         // try max button b presses, and reduce to find cheapest
                         let mut b = max_presses;
                         let mut a = (c.px - b * c.bx) / c.ax;
