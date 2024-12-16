@@ -58,27 +58,35 @@ fn solve1(farm: &HashMap<(isize, isize), char>) -> usize {
         .sum()
 }
 
-fn solve2(doubled_farm: &HashMap<(isize, isize), char>) -> usize {
+fn solve2(farm: &HashMap<(isize, isize), char>) -> usize {
     let dirs: Vec<(isize, isize)> = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
     let diags: Vec<(isize, isize)> = vec![(-1, -1), (-1, 1), (1, -1), (1, 1)];
-    regions(doubled_farm)
+    regions(farm)
         .into_iter()
         .map(|(_, region)| {
-            let area = region.len() / 4; // doubled size, so reduce area
-            let mut sides = 0; // count corners, same as sides
+            let area = region.len();
+            let mut doubled_region = HashSet::new();
             region.iter().for_each(|(r, c)| {
+                doubled_region.insert((2 * r, 2 * c));
+                doubled_region.insert((2 * r + 1, 2 * c));
+                doubled_region.insert((2 * r, 2 * c + 1));
+                doubled_region.insert((2 * r + 1, 2 * c + 1));
+            });
+
+            let mut sides = 0; // count corners, same as sides
+            doubled_region.iter().for_each(|(r, c)| {
                 let diag_neighbors: Vec<Option<&(isize, isize)>> = diags
                     .iter()
                     .map(|(dr, dc)| {
                         let neighbor_pos = (r + dr, c + dc);
-                        region.get(&neighbor_pos)
+                        doubled_region.get(&neighbor_pos)
                     })
                     .collect();
                 let dir_neighbors: Vec<Option<&(isize, isize)>> = dirs
                     .iter()
                     .map(|(dr, dc)| {
                         let neighbor_pos = (r + dr, c + dc);
-                        region.get(&neighbor_pos)
+                        doubled_region.get(&neighbor_pos)
                     })
                     .collect();
                 match (diag_neighbors.as_slice(), dir_neighbors.as_slice()) {
@@ -103,6 +111,7 @@ fn solve2(doubled_farm: &HashMap<(isize, isize), char>) -> usize {
                     _ => (),
                 }
             });
+
             area * sides
         })
         .sum()
@@ -126,22 +135,5 @@ pub fn solve() {
         })
         .collect();
     println!("2024.12.1: {}", solve1(&farm));
-
-    let doubled_farm = binding
-        .as_str()
-        .lines()
-        .flat_map(|l| {
-            let doubled_line: Vec<char> = l.chars().flat_map(|ch| vec![ch, ch]).collect();
-            vec![doubled_line.clone(), doubled_line]
-        })
-        .collect::<Vec<Vec<char>>>()
-        .iter()
-        .enumerate()
-        .flat_map(|(r, l)| {
-            l.iter()
-                .enumerate()
-                .map(move |(c, ch)| ((r as isize, c as isize), *ch))
-        })
-        .collect();
-    println!("2024.12.2: {}", solve2(&doubled_farm));
+    println!("2024.12.2: {}", solve2(&farm));
 }
