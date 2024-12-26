@@ -19,9 +19,11 @@ mod day17;
 mod day18;
 mod day19;
 mod day20;
+mod day21;
 mod day22;
 
 fn main() {
+    day21::solve();
     day22::solve();
     day20::solve();
     day19::solve();

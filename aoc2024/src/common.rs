@@ -13,6 +13,10 @@ where
     state: S,
 }
 
+/// Runs dijkstra on the starting states and calculates a predecessors map.
+/// Maps all reachable states to all possible predecessors along with their cost.
+/// This allows us to find all possible paths of shortest cost, instead of a single one.
+/// More inefficient than a normal dijkstra's run.
 pub fn dijkstra_predecessors<IX, FN, C, IN>(
     sources: Vec<IX>,
     mut successors: FN,
@@ -67,4 +71,33 @@ where
     }
 
     predecessors
+}
+
+/// Starting from a parent position, and predecessors, calculate all possible paths ending at the parent
+/// This is in reverse order: the parent comes first in the resulting Vecs, and goes to the starting state
+pub fn calculate_paths<IX, C>(preds: &HashMap<IX, (HashSet<IX>, C)>, parent: IX) -> Vec<Vec<IX>>
+where
+    IX: Eq + Hash + Clone + Ord,
+    C: Zero + Ord + Copy,
+{
+    if let Some((children, _)) = preds.get(&parent) {
+        children
+            .iter()
+            .flat_map(|c| {
+                let child_paths = calculate_paths(preds, c.clone());
+                child_paths
+                    .iter()
+                    .map(|cp| {
+                        let mut new_path = Vec::from([parent.clone()]);
+                        cp.iter().for_each(|c| {
+                            new_path.push(c.clone());
+                        });
+                        new_path
+                    })
+                    .collect::<Vec<Vec<IX>>>()
+            })
+            .collect()
+    } else {
+        Vec::from([Vec::from([parent])])
+    }
 }
