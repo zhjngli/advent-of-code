@@ -1,7 +1,9 @@
 use std::{
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     fs,
 };
+
+use crate::common::topological_sort;
 
 fn ordered(rs: &HashMap<i64, HashSet<i64>>, u: &Vec<i64>) -> bool {
     (0..u.len() - 1).all(|i| rs.get(&u[i]).unwrap_or(&HashSet::new()).contains(&u[i + 1]))
@@ -12,49 +14,6 @@ fn solve1(rs: &HashMap<i64, HashSet<i64>>, us: &Vec<Vec<i64>>) -> i64 {
         .filter(|u| ordered(rs, u))
         .map(|u| u[u.len() / 2])
         .sum()
-}
-
-fn topological_sort(g: &HashMap<i64, HashSet<i64>>) -> Vec<i64> {
-    let mut in_degrees = HashMap::new();
-    g.iter().for_each(|(k, vs)| {
-        in_degrees.entry(k.clone()).or_insert(0);
-        vs.iter().for_each(|v| {
-            in_degrees
-                .entry(v.clone())
-                .and_modify(|d| {
-                    *d += 1;
-                })
-                .or_insert(1);
-        });
-    });
-
-    let mut q = VecDeque::new();
-    in_degrees.iter().for_each(|(n, d)| {
-        if *d == 0 {
-            q.push_back(n.clone());
-        }
-    });
-
-    let mut sorted = Vec::new();
-    while let Some(node) = q.pop_front() {
-        sorted.push(node.clone());
-        if let Some(ns) = g.get(&node) {
-            ns.iter().for_each(|n| {
-                if let Some(d) = in_degrees.get_mut(n) {
-                    *d -= 1;
-                    if *d == 0 {
-                        q.push_back(n.clone());
-                    }
-                }
-            });
-        }
-    }
-
-    if sorted.len() < g.len() {
-        panic!("Cycle exists in graph: {:?}", g);
-    }
-
-    sorted
 }
 
 fn solve2(rs: &HashMap<i64, HashSet<i64>>, us: &Vec<Vec<i64>>) -> i64 {

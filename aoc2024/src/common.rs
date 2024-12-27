@@ -1,6 +1,7 @@
 use pathfinding::num_traits::Zero;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::fmt::Debug;
 use std::hash::Hash;
 
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone)]
@@ -144,11 +145,14 @@ pub fn transpose<T: Clone>(matrix: Vec<Vec<T>>) -> Vec<Vec<T>> {
     if matrix.is_empty() {
         return Vec::new();
     }
-    
+
     let rows = matrix.len();
     let cols = matrix[0].len();
 
-    assert!(matrix.iter().all(|r| r.len() == cols), "All rows must have the same length!");
+    assert!(
+        matrix.iter().all(|r| r.len() == cols),
+        "All rows must have the same length!"
+    );
 
     let mut transposed = vec![Vec::with_capacity(rows); cols];
     for r in matrix {
@@ -158,4 +162,51 @@ pub fn transpose<T: Clone>(matrix: Vec<Vec<T>>) -> Vec<Vec<T>> {
     }
 
     transposed
+}
+
+/// Topological sort of a graph
+pub fn topological_sort<T>(g: &HashMap<T, HashSet<T>>) -> Vec<T>
+where
+    T: Eq + Hash + Clone + Debug,
+{
+    let mut in_degrees = HashMap::new();
+    g.iter().for_each(|(k, vs)| {
+        in_degrees.entry(k.clone()).or_insert(0);
+        vs.iter().for_each(|v| {
+            in_degrees
+                .entry(v.clone())
+                .and_modify(|d| {
+                    *d += 1;
+                })
+                .or_insert(1);
+        });
+    });
+
+    let mut q = VecDeque::new();
+    in_degrees.iter().for_each(|(n, d)| {
+        if *d == 0 {
+            q.push_back(n.clone());
+        }
+    });
+
+    let mut sorted = Vec::new();
+    while let Some(node) = q.pop_front() {
+        sorted.push(node.clone());
+        if let Some(ns) = g.get(&node) {
+            ns.iter().for_each(|n| {
+                if let Some(d) = in_degrees.get_mut(n) {
+                    *d -= 1;
+                    if *d == 0 {
+                        q.push_back(n.clone());
+                    }
+                }
+            });
+        }
+    }
+
+    if sorted.len() < g.len() {
+        panic!("Cycle exists in graph: {:?}", g);
+    }
+
+    sorted
 }
