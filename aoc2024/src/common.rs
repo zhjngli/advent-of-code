@@ -101,3 +101,40 @@ where
         Vec::from([Vec::from([parent])])
     }
 }
+
+/// Bron-kerbosch algorithm to find a maximal clique in a graph
+/// r is the current clique
+/// p is the set of potential nodes to be added to the clique
+/// x is the set of nodes that cannot be added to the clique
+pub fn bron_kerbosch<N>(
+    r: &HashSet<N>,
+    p: &mut HashSet<N>,
+    x: &mut HashSet<N>,
+    graph: &HashMap<N, HashSet<N>>,
+) -> HashSet<N>
+where
+    N: Eq + Hash + Clone + Ord,
+{
+    if p.is_empty() && x.is_empty() {
+        return r.clone();
+    }
+
+    let mut max_clique = HashSet::new();
+    for v in p.clone() {
+        let mut new_r = r.clone();
+        new_r.insert(v.clone());
+
+        let ns = graph.get(&v).unwrap();
+        let mut new_p = p.intersection(ns).cloned().collect();
+        let mut new_x = x.intersection(ns).cloned().collect();
+        let clique = bron_kerbosch(&new_r, &mut new_p, &mut new_x, graph);
+        if clique.len() > max_clique.len() {
+            max_clique = clique;
+        }
+
+        p.remove(&v);
+        x.insert(v);
+    }
+
+    max_clique
+}
