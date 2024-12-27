@@ -23,8 +23,10 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
+mod day25;
 
 fn main() {
+    day25::solve();
     day24::solve();
     day23::solve();
     day22::solve();

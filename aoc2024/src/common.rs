@@ -73,34 +73,34 @@ where
     predecessors
 }
 
-/// Starting from a parent position, and predecessors, calculate all possible paths ending at the parent
-/// This is in reverse order: the parent comes first in the resulting Vecs, and goes to the starting state
-pub fn calculate_paths<IX, C>(preds: &HashMap<IX, (HashSet<IX>, C)>, parent: IX) -> Vec<Vec<IX>>
-where
-    IX: Eq + Hash + Clone + Ord,
-    C: Zero + Ord + Copy,
-{
-    if let Some((children, _)) = preds.get(&parent) {
-        children
-            .iter()
-            .flat_map(|c| {
-                let child_paths = calculate_paths(preds, c.clone());
-                child_paths
-                    .iter()
-                    .map(|cp| {
-                        let mut new_path = Vec::from([parent.clone()]);
-                        cp.iter().for_each(|c| {
-                            new_path.push(c.clone());
-                        });
-                        new_path
-                    })
-                    .collect::<Vec<Vec<IX>>>()
-            })
-            .collect()
-    } else {
-        Vec::from([Vec::from([parent])])
-    }
-}
+// /// Starting from a parent position, and predecessors, calculate all possible paths ending at the parent
+// /// This is in reverse order: the parent comes first in the resulting Vecs, and goes to the starting state
+// pub fn calculate_paths<IX, C>(preds: &HashMap<IX, (HashSet<IX>, C)>, parent: IX) -> Vec<Vec<IX>>
+// where
+//     IX: Eq + Hash + Clone + Ord,
+//     C: Zero + Ord + Copy,
+// {
+//     if let Some((children, _)) = preds.get(&parent) {
+//         children
+//             .iter()
+//             .flat_map(|c| {
+//                 let child_paths = calculate_paths(preds, c.clone());
+//                 child_paths
+//                     .iter()
+//                     .map(|cp| {
+//                         let mut new_path = Vec::from([parent.clone()]);
+//                         cp.iter().for_each(|c| {
+//                             new_path.push(c.clone());
+//                         });
+//                         new_path
+//                     })
+//                     .collect::<Vec<Vec<IX>>>()
+//             })
+//             .collect()
+//     } else {
+//         Vec::from([Vec::from([parent])])
+//     }
+// }
 
 /// Bron-kerbosch algorithm to find a maximal clique in a graph
 /// r is the current clique
@@ -137,4 +137,25 @@ where
     }
 
     max_clique
+}
+
+/// Transpose a 2D vec
+pub fn transpose<T: Clone>(matrix: Vec<Vec<T>>) -> Vec<Vec<T>> {
+    if matrix.is_empty() {
+        return Vec::new();
+    }
+    
+    let rows = matrix.len();
+    let cols = matrix[0].len();
+
+    assert!(matrix.iter().all(|r| r.len() == cols), "All rows must have the same length!");
+
+    let mut transposed = vec![Vec::with_capacity(rows); cols];
+    for r in matrix {
+        for (i, v) in r.into_iter().enumerate() {
+            transposed[i].push(v);
+        }
+    }
+
+    transposed
 }
