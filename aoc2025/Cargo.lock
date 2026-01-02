@@ -6,6 +6,7 @@ version = 3
 name = "aoc2025"
 version = "0.1.0"
 dependencies = [
+ "iter-first-max",
  "pathfinding",
 ]
 
@@ -57,6 +58,12 @@ checksum = "276ec31bcb4a9ee45f58bec6f9ec700ae4cf4f4f8f2fa7e06cb406bd5ffdd770"
 dependencies = [
  "num-traits",
 ]
+
+[[package]]
+name = "iter-first-max"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42ace18d32276b4ce7d8261c06b376398a4ea82e4715a5b37e46fddbff41a617"
 
 [[package]]
 name = "num-traits"
