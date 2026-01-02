@@ -33,37 +33,35 @@ fn solve1(manifold: &Vec<&str>) -> usize {
 }
 
 fn solve2(manifold: &Vec<&str>) -> usize {
-    let mut beams = HashMap::new();
-    beams.insert(manifold[0].find('S').unwrap(), 1);
+    let mut timelines = HashMap::new();
+    timelines.insert(manifold[0].find('S').unwrap(), 1);
     manifold
         .iter()
-        .fold((0, beams), |(mut splits, beams), row| {
-            let mut new_beams = HashMap::new();
-            for (&b, &count) in beams.iter() {
+        .fold(timelines, |timelines, row| {
+            let mut new_timelines = HashMap::new();
+            for (&b, &count) in timelines.iter() {
                 match row.chars().nth(b).unwrap() {
                     '.' | 'S' => {
-                        new_beams
+                        new_timelines
                             .entry(b)
                             .and_modify(|e| *e += count)
                             .or_insert(count);
                     }
                     '^' => {
-                        new_beams
+                        new_timelines
                             .entry(b - 1)
                             .and_modify(|e| *e += count)
                             .or_insert(count);
-                        new_beams
+                        new_timelines
                             .entry(b + 1)
                             .and_modify(|e| *e += count)
                             .or_insert(count);
-                        splits += 1;
                     }
                     c => panic!("unknown char {} at beam {}", c, b),
                 }
             }
-            (splits, new_beams)
+            new_timelines
         })
-        .1
         .values()
         .sum()
 }
