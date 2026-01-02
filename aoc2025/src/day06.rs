@@ -38,6 +38,7 @@ fn solve1(nums: &Vec<Vec<usize>>, ops: &Vec<char>) -> usize {
 
 fn parse2(input: &str) -> (Vec<Vec<usize>>, Vec<char>) {
     let ls = input.lines().collect::<Vec<&str>>();
+
     let (mut nums, curr) = transpose(
         ls[..ls.len() - 1]
             .iter()
@@ -62,6 +63,7 @@ fn parse2(input: &str) -> (Vec<Vec<usize>>, Vec<char>) {
         .filter(|c| *c != "")
         .map(|c| c.chars().next().unwrap())
         .collect();
+
     assert_eq!(nums.len(), ops.len());
     (nums, ops)
 }
