@@ -8,8 +8,10 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+mod day10;
 
 fn main() {
+    day10::solve();
     day09::solve();
     day08::solve();
     day07::solve();
