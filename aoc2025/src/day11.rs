@@ -100,6 +100,46 @@ fn paths_toposort(
     paths[ei]
 }
 
+// for some reason this is stupid slow?
+// fn paths_dfs2(cables: &HashMap<&str, Vec<&str>>, start: &str, end: &str) -> usize {
+//     fn dfs<'a>(
+//         cables: &HashMap<&str, Vec<&'a str>>,
+//         u: &'a str,
+//         found_fft: bool,
+//         found_dac: bool,
+//         end: &str,
+//         memo: &mut HashMap<(&'a str, bool, bool), usize>,
+//     ) -> usize {
+//         if u == end {
+//             return 1;
+//         }
+//         println!(
+//             "Visiting {}, found_fft: {}, found_dac: {}",
+//             u,
+//             found_fft,
+//             found_dac
+//         );
+//         let mut total_paths = 0;
+//         for v in cables.get(u).unwrap_or(&vec![]) {
+//             total_paths += dfs(cables, v, found_fft, found_dac, end, memo);
+//         }
+//         if total_paths == 0 {
+//             return total_paths;
+//         }
+//         let did_find_fft = found_fft || u == "fft";
+//         let did_find_dac = found_dac || u == "dac";
+//         memo.insert((u, did_find_fft, did_find_dac), total_paths);
+//         total_paths
+//     }
+
+//     let mut memo = HashMap::new();
+//     dfs(cables, start, false, false, end, &mut memo)
+// }
+
+// fn solve2dfs(cables: &HashMap<&str, Vec<&str>>) -> usize {
+//     paths_dfs2(cables, "svr", "out")
+// }
+
 fn solve2(cables: &HashMap<&str, Vec<&str>>) -> usize {
     let mut map = HashMap::new();
     cables.iter().for_each(|(k, v)| {
@@ -133,4 +173,5 @@ pub fn solve() {
 
     println!("2025.11.1: {}", solve1(&cables));
     println!("2025.11.2: {}", solve2(&cables));
+    // println!("2025.11.2dfs: {}", solve2dfs(&cables));
 }
