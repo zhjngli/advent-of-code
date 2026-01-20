@@ -42,11 +42,7 @@ fn solve1(s: &Vec<Vec<char>>) -> usize {
                             }
                         })
                         .count();
-                        if adjacent_rolls < 4 {
-                            1
-                        } else {
-                            0
-                        }
+                        if adjacent_rolls < 4 { 1 } else { 0 }
                     }
                 })
                 .sum::<usize>()

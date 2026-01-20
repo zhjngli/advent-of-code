@@ -1,8 +1,9 @@
 [package]
 name = "aoc2025"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 iter-first-max = "0.1.2"
 pathfinding = "4.14.0"
+z3 = "0.13.3"
