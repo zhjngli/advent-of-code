@@ -38,14 +38,6 @@ fn parse(s: &str) -> Vec<Machine> {
         .collect()
 }
 
-fn print_lights(lights: &Vec<bool>) {
-    print!("[");
-    for b in lights {
-        print!("{}", if *b { "#" } else { "." });
-    }
-    print!("]");
-}
-
 fn solve1(machines: &Vec<Machine>) -> usize {
     machines
         .iter()
@@ -66,6 +58,16 @@ fn solve1(machines: &Vec<Machine>) -> usize {
             *c
         })
         .sum()
+}
+
+fn show_lights(lights: &Vec<bool>) -> String {
+    let mut s = String::new();
+    s.push('[');
+    for b in lights {
+        s.push(if *b { '#' } else { '.' });
+    }
+    s.push(']');
+    s
 }
 
 fn solve2(machines: &Vec<Machine>) -> usize {
@@ -107,8 +109,18 @@ fn solve2(machines: &Vec<Machine>) -> usize {
                     let total_presses_num = model.eval(&total_presses, true).unwrap();
                     total_presses_num.as_u64().unwrap() as usize
                 }
-                z3::SatResult::Unsat => panic!("Unsat"),
-                z3::SatResult::Unknown => panic!("Unknown"),
+                z3::SatResult::Unsat => panic!(
+                    "Unsat: {}, {:?}, {:?}",
+                    show_lights(&m.lights),
+                    m.buttons,
+                    m.joltage
+                ),
+                z3::SatResult::Unknown => panic!(
+                    "Unknown: {}, {:?}, {:?}",
+                    show_lights(&m.lights),
+                    m.buttons,
+                    m.joltage
+                ),
             }
         })
         .sum()
