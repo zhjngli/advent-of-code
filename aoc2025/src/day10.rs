@@ -89,10 +89,10 @@ fn solve2_rec(
     }
 
     let joltage_parity: Vec<bool> = joltage.iter().map(|j| j % 2 == 1).collect();
-    if !parity_to_combo_map.contains_key(&joltage_parity) {
-        panic!("No combos for joltage_parity: {:?}", joltage_parity);
-    }
-    let parity_combos = parity_to_combo_map.get(&joltage_parity).unwrap();
+    let parity_combos = match parity_to_combo_map.get(&joltage_parity) {
+        Some(combos) => combos,
+        None => &Vec::new(),
+    };
 
     let mut min_cost: Option<usize> = None;
     for (combo, contribution) in parity_combos {
@@ -126,7 +126,6 @@ fn solve2_rec(
     min_cost
 }
 
-// this is a lot slower than the alt method, not sure why yet
 fn solve2(machines: &Vec<Machine>) -> usize {
     machines
         .iter()
@@ -145,37 +144,26 @@ fn solve2(machines: &Vec<Machine>) -> usize {
                 all_combinations = new_combinations;
             }
 
-            // precalculate all possible parity patterns and map it to combos that produce it
+            // for every button press combo, compute resulting lights and contribution to joltage
             let mut parity_to_combo_map: HashMap<Vec<bool>, Vec<(Vec<usize>, Vec<usize>)>> =
                 HashMap::new();
-            for i in 0..(1 << m.lights.len()) {
-                // calculate parity pattern
-                let mut parity_pattern = Vec::new();
-                for l in 0..m.lights.len() {
-                    parity_pattern.push((i >> l) & 1 == 1);
-                }
-
-                // calculate all combos that produce this parity pattern
-                let mut parity_combos = Vec::new();
-                for combo in &all_combinations {
-                    let mut lights = vec![false; m.lights.len()];
-                    for bi in combo {
-                        for li in &m.buttons[*bi] {
-                            lights[*li] = !lights[*li];
-                        }
-                    }
-                    if lights == parity_pattern {
-                        let mut contribution = vec![0; m.joltage.len()];
-                        for bi in combo {
-                            for li in &m.buttons[*bi] {
-                                contribution[*li] += 1;
-                            }
-                        }
-                        parity_combos.push((combo.clone(), contribution));
+            for combo in &all_combinations {
+                let mut lights = vec![false; m.lights.len()];
+                for bi in combo {
+                    for li in &m.buttons[*bi] {
+                        lights[*li] = !lights[*li];
                     }
                 }
-
-                parity_to_combo_map.insert(parity_pattern, parity_combos);
+                let mut contribution = vec![0; m.joltage.len()];
+                for bi in combo {
+                    for li in &m.buttons[*bi] {
+                        contribution[*li] += 1;
+                    }
+                }
+                parity_to_combo_map
+                    .entry(lights)
+                    .or_insert(Vec::new())
+                    .push((combo.clone(), contribution));
             }
 
             let mut memo = HashMap::new();
@@ -396,7 +384,6 @@ fn solve2_alt(machines: &Vec<Machine>) -> usize {
             let num_switches = &m.joltage.len();
             let parity_pattern_costs = parity_to_combo_map(&m.buttons, *num_switches);
             let mut memo: HashMap<Vec<usize>, usize> = HashMap::new();
-
             solve2_alt_rec(&m.joltage, &parity_pattern_costs, &mut memo)
         })
         .sum()
